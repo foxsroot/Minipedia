@@ -17,7 +17,7 @@ sequelize
 app.use(json());
 
 // Routes start
-app.use("/auth", authRoutes);
+app.use("/api", authRoutes);
 // Routes end
 
 app.use(errorHandler);

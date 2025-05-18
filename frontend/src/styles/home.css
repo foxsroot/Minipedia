@@ -1,0 +1,9 @@
+.home-tokopedia-bg {
+  min-height: 100vh;
+  width: 100vw;
+  background: #eaffea;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
