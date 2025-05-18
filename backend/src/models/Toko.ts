@@ -1,0 +1,62 @@
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany } from "sequelize-typescript";
+import { User } from "./User";
+import { Barang } from "./Barang";
+
+@Table({
+    tableName: "toko",
+    timestamps: false
+})
+export class Toko extends Model {
+    @Column({
+        primaryKey: true,
+        type: DataType.UUID,
+        defaultValue: DataType.UUIDV4,
+        allowNull: false
+    })
+    declare tokoId: string;
+
+    @ForeignKey(() => User)
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    declare userId: number;
+
+    @Column({
+        type: DataType.STRING,
+        allowNull: false
+    })
+    declare namaToko: string;
+
+    @Column({
+        type: DataType.STRING,
+        allowNull: false
+    })
+    declare lokasiToko: string;
+
+    @Column({
+        type: DataType.STRING,
+        allowNull: false
+    })
+    declare statusToko: string;
+
+    @Column({
+        type: DataType.DATE,
+        allowNull: false,
+        defaultValue: DataType.NOW
+    })
+    declare createdAt: Date;
+
+    @Column({
+        type: DataType.DATE,
+        allowNull: false,
+        defaultValue: DataType.NOW
+    })
+    declare updatedAt: Date;
+
+    @BelongsTo(() => User)
+    declare user: User;
+
+    @HasMany(() => Barang)
+    declare barangs: Barang[];
+}
