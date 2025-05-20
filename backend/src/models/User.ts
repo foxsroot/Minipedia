@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from "sequelize-typescript";
+import { Table, Column, Model, DataType, HasOne } from "sequelize-typescript";
 import { Toko } from "./Toko";
 
 @Table({
@@ -65,4 +65,7 @@ export class User extends Model {
         defaultValue: DataType.NOW
     })
     declare updatedAt: Date;
+
+    @HasOne(() => Toko)
+    declare toko: Toko;
 }

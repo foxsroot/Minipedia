@@ -5,7 +5,7 @@ import { decryptUserFields } from '../utils/encryption';
 
 export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const user = await User.findByPk(req.params.id);
+        const user = await User.findByPk(req.params.id, { include: [Toko] });
         if (!user) {
             res.status(404).json({ message: 'User not found' });
             return;
