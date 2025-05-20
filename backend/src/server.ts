@@ -24,7 +24,7 @@ app.use(json());
 
 // Routes start
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/barang", barangRoutes);
 app.use("/api/notifikasi", notifikasiRoutes);
 app.use("/api/order", orderRoutes);

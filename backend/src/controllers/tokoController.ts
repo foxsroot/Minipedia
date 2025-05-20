@@ -9,7 +9,7 @@ export const getTokoById = async (req: Request, res: Response, next: NextFunctio
         const toko = await Toko.findByPk(req.params.id, {
             include: [
                 { model: User, as: 'user' },
-                { model: Barang, as: 'barangs' }
+                { model: Barang, as: 'barang' }
             ]
         });
         if (!toko) {
@@ -29,7 +29,7 @@ export const getAllTokos = async (req: Request, res: Response, next: NextFunctio
         const tokos = await Toko.findAll({
             include: [
                 { model: User, as: 'user' },
-                { model: Barang, as: 'barangs' }
+                { model: Barang, as: 'barang' }
             ]
         });
         const result = tokos.map(toko => {

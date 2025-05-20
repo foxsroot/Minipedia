@@ -5,13 +5,12 @@ import { decryptUserFields } from '../utils/encryption';
 
 export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const user = await User.findByPk(req.params.id, { include: [Toko] });
+        const user = await User.findByPk(req.params.id);
         if (!user) {
             res.status(404).json({ message: 'User not found' });
             return;
         }
         const decryptedUser = decryptUserFields(user);
-        if (user.toko) decryptedUser.toko = user.toko;
         res.json(decryptedUser);
     } catch (err) {
         next(err);
@@ -23,7 +22,6 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
         const users = await User.findAll({ include: [Toko] });
         const decryptedUsers = users.map(user => {
             const dec = decryptUserFields(user);
-            if (user.toko) dec.toko = user.toko;
             return dec;
         });
         res.json(decryptedUsers);

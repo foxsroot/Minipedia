@@ -14,13 +14,6 @@ export class User extends Model {
     })
     declare userId: string;
 
-    @ForeignKey(() => Toko)
-    @Column({
-        type: DataType.UUID,
-        allowNull: true
-    })
-    declare tokoId: string;
-
     @Column({
         type: DataType.STRING,
         allowNull: false
@@ -72,7 +65,4 @@ export class User extends Model {
         defaultValue: DataType.NOW
     })
     declare updatedAt: Date;
-
-    @BelongsTo(() => Toko)
-    declare toko: Toko;
 }

@@ -17,10 +17,10 @@ export class Toko extends Model {
 
     @ForeignKey(() => User)
     @Column({
-        type: DataType.INTEGER,
+        type: DataType.UUID,
         allowNull: false
     })
-    declare userId: number;
+    declare userId: string;
 
     @Column({
         type: DataType.STRING,
@@ -58,5 +58,5 @@ export class Toko extends Model {
     declare user: User;
 
     @HasMany(() => Barang)
-    declare barangs: Barang[];
+    declare barang: Barang[];
 }
