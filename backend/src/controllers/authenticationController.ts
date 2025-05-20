@@ -54,8 +54,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         let user = null;
         for (const u of users) {
             const decryptedEmail = decryptField(u.email, ENCRYPT_SECRET);
-            const decryptedPassword = decryptField(u.password, ENCRYPT_SECRET);
-            if (decryptedEmail === email && decryptedPassword === password) {
+            if (decryptedEmail === email) {
                 user = u;
                 break;
             }
