@@ -14,15 +14,19 @@ export async function register(req: Request, res: Response, next: NextFunction) 
         if (!username || !email || !password || !nama || !nomorTelpon || !statusMember) {
             return next(new ApiError(400, 'All fields are required'));
         }
-        const existingUser = await User.findOne({ where: { email } });
-        if (existingUser) {
-            return next(new ApiError(409, 'Email already registered'));
-        }
-        const hashedPassword = await bcrypt.hash(password, 10);
         const ENCRYPT_SECRET = process.env.ENCRYPT_SECRET;
+        const hashedPassword = await bcrypt.hash(password, 10);
         if (!ENCRYPT_SECRET || ENCRYPT_SECRET.length !== 64) {
             return next(new ApiError(500, 'ENCRYPT_SECRET must be a 64-character hex string'));
         }
+        
+        const decryptedEmail = decryptField(email, ENCRYPT_SECRET);
+        
+        const existingUser = await User.findOne({ where: { decryptedEmail } });
+        if (existingUser) {
+            return next(new ApiError(409, 'Email already registered'));
+        }
+
         const encryptedUser = {
             username: encryptField(username, ENCRYPT_SECRET),
             email: encryptField(email, ENCRYPT_SECRET),
@@ -97,6 +101,11 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
             throw new Error("JWT_SECRET is not defined in the environment variables.");
         }
 
+        const isBlacklisted = await redis.get(`blacklist:${token}`);
+        if (isBlacklisted) {
+            return next(new ApiError(400, "Token already logged out / blacklisted"));
+        }
+
         const decoded = jwt.verify(token, JWT_SECRET) as { exp: number };
         const expirationTime = decoded.exp;
 
@@ -106,6 +115,9 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
             message: "Logout successful",
         });
     } catch (error) {
+        if (error instanceof Error && (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError')) {
+            return next(new ApiError(400, "Token already invalid or expired"));
+        }
         next(new ApiError(500, "Logout failed"));
     }
 }
