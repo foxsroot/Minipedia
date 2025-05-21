@@ -1,73 +1,73 @@
-'use strict';
+"use strict";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('orders', {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable("order", {
       orderId: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
       },
       userId: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: { model: 'users', key: 'userId' },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
+        references: { model: "user", key: "userId" },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       waktuTransaksi: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW
+        defaultValue: Sequelize.NOW,
       },
       alamatPengiriman: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       namaPenerima: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       statusPesanan: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       nomorResi: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: true,
       },
       nomorTelpon: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       penerima: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       pengiriman: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       tanggalBarangDiterima: {
         type: Sequelize.DATE,
-        allowNull: true
+        allowNull: true,
       },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW
-      }
+        defaultValue: Sequelize.NOW,
+      },
     });
   },
 
-  async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('orders');
-  }
+  async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable("order");
+  },
 };
