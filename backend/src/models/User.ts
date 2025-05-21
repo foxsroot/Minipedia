@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from "sequelize-typescript";
+import { Table, Column, Model, DataType, HasOne } from "sequelize-typescript";
 import { Toko } from "./Toko";
 
 @Table({
@@ -13,13 +13,6 @@ export class User extends Model {
         allowNull: false
     })
     declare userId: string;
-
-    @ForeignKey(() => Toko)
-    @Column({
-        type: DataType.UUID,
-        allowNull: true
-    })
-    declare tokoId: string;
 
     @Column({
         type: DataType.STRING,
@@ -73,6 +66,6 @@ export class User extends Model {
     })
     declare updatedAt: Date;
 
-    @BelongsTo(() => Toko)
+    @HasOne(() => Toko)
     declare toko: Toko;
 }
