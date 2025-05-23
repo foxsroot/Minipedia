@@ -29,7 +29,18 @@ const CreateItem: React.FC = () => {
         hargaBarang: Number(formData.hargaBarang),
       };
 
-      await axios.post('/api/barang', payload); // Adjust the URL if needed
+      const token = localStorage.getItem("token");
+        if (!token) {
+        navigate("/login"); // or use window.location.href = "/login"
+        return;
+        }
+
+        await axios.post('/api/barang', payload, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        });
+
       setSnackbar({ open: true, success: true, message: 'Barang berhasil ditambahkan!' });
       setFormData({
         namaBarang: '',
@@ -39,7 +50,11 @@ const CreateItem: React.FC = () => {
         kategoriProduk: '',
       });
     } catch (error: any) {
-      setSnackbar({ open: true, success: false, message: 'Gagal menambahkan barang.' });
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+            window.location.href = "/login"; // or use navigate("/login")
+        } else {
+            setSnackbar({ open: true, success: false, message: 'Gagal menambahkan barang.' });
+        }
     }
   };
 
