@@ -5,7 +5,11 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Development from "./pages/Development";
 import RegisterToko from "./pages/RegisterToko";
+<<<<<<< HEAD
 import UpdateToko from "./pages/UpdateToko";
+=======
+import CreateItem from "./pages/addProduct";
+>>>>>>> c791fe18772b3bda67c9de8bb9402145270a3dda
 import "./styles/main.css";
 
 const App = () => {
