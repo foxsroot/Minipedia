@@ -9,24 +9,34 @@ import { encryptField, decryptField } from "../utils/encryption";
 const redis = new Redis();
 
 export async function register(req: Request, res: Response, next: NextFunction) {
+    const { username, email, password, nama, nomorTelpon } = req.body;
+
+    if (!username || !email || !password || !nama || !nomorTelpon) {
+        return next(new ApiError(400, 'All fields are required'));
+    }
+
+    console.log("DATA: ");
+    console.log("username: ", username);
+    console.log("emaik: ", email);
+    console.log("password: ", password);
+    console.log("nama: ", nama);
+    console.log("noTelp: ", nomorTelpon);
+
     try {
-        const { username, email, password, nama, nomorTelpon } = req.body;
-        if (!username || !email || !password || !nama || !nomorTelpon) {
-            return next(new ApiError(400, 'All fields are required'));
-        }
         const ENCRYPT_SECRET = process.env.ENCRYPT_SECRET;
         const hashedPassword = await bcrypt.hash(password, 10);
         if (!ENCRYPT_SECRET || ENCRYPT_SECRET.length !== 64) {
             return next(new ApiError(500, 'ENCRYPT_SECRET must be a 64-character hex string'));
         }
 
-        const decryptedEmail = decryptField(email, ENCRYPT_SECRET);
+        const encryptedEmail = encryptField(email, ENCRYPT_SECRET);
 
-        const existingUser = await User.findOne({ where: { decryptedEmail } });
+        const existingUser = await User.findOne({ where: { email: encryptedEmail } });
+
         if (existingUser) {
             return next(new ApiError(409, 'Email already registered'));
         }
-    
+
         const encryptedUser = {
             username: encryptField(username, ENCRYPT_SECRET),
             email: encryptField(email, ENCRYPT_SECRET),
@@ -39,6 +49,7 @@ export async function register(req: Request, res: Response, next: NextFunction) 
         const user = await User.create(encryptedUser);
         res.status(201).json({ message: 'Registration successful', user });
     } catch (err) {
+        console.log(err);
         next(err);
     }
 }

@@ -38,7 +38,13 @@ const Register = () => {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, username, nama, nomorTelepon, password }),
+        body: JSON.stringify({
+          email,
+          username,
+          nama,
+          nomorTelpon: nomorTelepon,
+          password,
+        }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -285,6 +291,7 @@ const Register = () => {
 
         <Button
           type="submit"
+          onSubmit={handleSubmit}
           fullWidth
           disabled={loading}
           sx={{
