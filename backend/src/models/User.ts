@@ -61,5 +61,5 @@ export class User extends Model {
     declare updatedAt: Date;
 
     @HasOne(() => Toko)
-    declare toko: Toko;
+    declare toko?: Toko;
 }

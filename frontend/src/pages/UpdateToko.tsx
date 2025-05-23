@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import NavigationBar from "../components/NavigationBar";
+import SellerNavbar from "../components/SellerNavbar";
 import SellerSidebar from "../components/SellerSidebar";
 
 const UpdateToko = () => {
@@ -57,7 +57,7 @@ const UpdateToko = () => {
 
   return (
     <div>
-      <NavigationBar />
+      <SellerNavbar />
       <div style={{ display: "flex" }}>
         <SellerSidebar />
         <main style={{ flex: 1, padding: "2rem 0 2rem 2rem", background: "#f8f9fb", minHeight: "100vh" }}>

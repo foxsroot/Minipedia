@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -9,22 +10,20 @@ import {
   Badge,
   Box,
   ButtonBase,
+  Button,
 } from "@mui/material";
-import { styled, alpha } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import {
   FaSearch,
   FaRegUserCircle,
-  FaBell,
   FaShoppingCart,
 } from "react-icons/fa";
 
-type UserType = { name: string; avatar: string; notifications: number };
-const users: UserType[] = [
-  { name: "John Doe", avatar: "/john.png", notifications: 5 },
-  { name: "Jane Smith", avatar: "/jane.png", notifications: 0 },
-];
-const user = null as UserType | null;
-// const user = users[1];
+type UserType = {
+  nama: string;
+  userId: string;
+  hasToko: boolean;
+};
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -103,6 +102,39 @@ const UserName = styled("span")(({ theme }) => ({
 }));
 
 const NavigationBar = () => {
+  const [user, setUser] = useState<UserType | null>(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        const res = await fetch("/api/user/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+        } else {
+          setUser(null);
+        }
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
+
   return (
     <StyledAppBar position="sticky" elevation={0}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -120,17 +152,42 @@ const NavigationBar = () => {
         </SearchBar>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: "1.2rem" }}>
-          <IconButton title="Notifications" sx={{ color: "#222" }}>
-            <Badge badgeContent={3} color="error">
-              <FaBell size={20} />
-            </Badge>
-          </IconButton>
-
           <IconButton title="Cart" sx={{ color: "#222" }}>
             <Badge badgeContent={2} color="error">
               <FaShoppingCart size={20} />
             </Badge>
           </IconButton>
+
+          {!loading && (
+            user ? (
+              user.hasToko ? (
+                <Button
+                  variant="contained"
+                  color="success"
+                  sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
+                  onClick={() => navigate("/seller-homepage")}
+                >
+                  Seller Dashboard
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="success"
+                  sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
+                  onClick={() => navigate("/register-toko")}
+                >
+                  Register Toko
+                </Button>
+              )
+            ) : <Button
+                  variant="contained"
+                  color="success"
+                  sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
+                  onClick={() => navigate("/seller-homepage")}
+                >
+                  Seller Dashboard
+                </Button>
+          )}
 
           {!user ? (
             <Link to="/login" style={{ textDecoration: "none" }}>
@@ -144,14 +201,12 @@ const NavigationBar = () => {
               to="/profile"
               sx={{ display: "flex", alignItems: "center" }}
             >
-              <Badge badgeContent={user.notifications} color="error">
-                <Avatar
-                  alt={user.name}
-                  src={user.avatar || "/default.png"}
-                  sx={{ width: 40, height: 40 }}
-                />
-              </Badge>
-              <UserName>{user.name}</UserName>
+              <Avatar
+                alt={user.nama}
+                src={"/default.png"}
+                sx={{ width: 40, height: 40 }}
+              />
+              <UserName>{user.nama}</UserName>
             </ButtonBase>
           )}
         </Box>

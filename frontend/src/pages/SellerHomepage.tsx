@@ -1,4 +1,4 @@
-import NavigationBar from "../components/NavigationBar";
+import SellerNavbar from "../components/SellerNavbar";
 import SellerSidebar from "../components/SellerSidebar";
 import { Line, Bar } from "@ant-design/charts";
 
@@ -40,7 +40,7 @@ const barConfig = {
 const SellerHomepage = () => {
   return (
     <div>
-      <NavigationBar />
+      <SellerNavbar />
       <div style={{ display: "flex" }}>
         <SellerSidebar />
         <main style={{ flex: 1, padding: "2rem" }}>
