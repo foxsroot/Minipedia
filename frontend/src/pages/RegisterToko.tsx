@@ -4,7 +4,6 @@ import NavigationBar from "../components/NavigationBar";
 const RegisterToko = () => {
   const [namaToko, setNamaToko] = useState("");
   const [lokasiToko, setLokasiToko] = useState("");
-  const [statusToko, setStatusToko] = useState<"Active" | "Inactive">("Active");
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,13 +15,12 @@ const RegisterToko = () => {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem("token")}`, 
         },
-        body: JSON.stringify({ namaToko, lokasiToko, statusToko }),
+        body: JSON.stringify({ namaToko, lokasiToko }),
       });
       if (response.ok) {
         setMessage("Toko berhasil didaftarkan!");
         setNamaToko("");
         setLokasiToko("");
-        setStatusToko("Active");
       } else {
         const data = await response.json();
         setMessage(data.message || "Gagal mendaftarkan toko.");
@@ -94,35 +92,6 @@ const RegisterToko = () => {
                 border: "1px solid #ccc",
               }}
             />
-          </div>
-          <div style={{ marginBottom: "1.5rem" }}>
-            <label style={{ display: "block", marginBottom: 4 }}>
-              Status Toko
-            </label>
-            <div>
-              <label style={{ marginRight: "1rem" }}>
-                <input
-                  type="radio"
-                  name="statusToko"
-                  value="Active"
-                  checked={statusToko === "Active"}
-                  onChange={() => setStatusToko("Active")}
-                  style={{ marginRight: 4 }}
-                />
-                Active
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="statusToko"
-                  value="Inactive"
-                  checked={statusToko === "Inactive"}
-                  onChange={() => setStatusToko("Inactive")}
-                  style={{ marginRight: 4 }}
-                />
-                Inactive
-              </label>
-            </div>
           </div>
           <button
             type="submit"

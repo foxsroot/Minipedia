@@ -5,7 +5,6 @@ import SellerSidebar from "../components/SellerSidebar";
 const UpdateToko = () => {
   const [namaToko, setNamaToko] = useState("");
   const [lokasiToko, setLokasiToko] = useState("");
-  const [statusToko, setStatusToko] = useState<"Active" | "Inactive">("Active");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +21,6 @@ const UpdateToko = () => {
           const toko = Array.isArray(data) ? data[0] : data;
           setNamaToko(toko?.namaToko || "");
           setLokasiToko(toko?.lokasiToko || "");
-          setStatusToko(toko?.statusToko === "Inactive" ? "Inactive" : "Active");
         } else {
           setMessage("Gagal mengambil data toko.");
         }
@@ -44,7 +42,7 @@ const UpdateToko = () => {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ namaToko, lokasiToko, statusToko }),
+        body: JSON.stringify({ namaToko, lokasiToko }),
       });
       if (response.ok) {
         setMessage("Toko berhasil diupdate!");
@@ -107,35 +105,6 @@ const UpdateToko = () => {
                     fontSize: "1rem",
                   }}
                 />
-              </div>
-              <div style={{ marginBottom: "2rem" }}>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>
-                  Status Toko
-                </label>
-                <div>
-                  <label style={{ marginRight: "2rem" }}>
-                    <input
-                      type="radio"
-                      name="statusToko"
-                      value="Active"
-                      checked={statusToko === "Active"}
-                      onChange={() => setStatusToko("Active")}
-                      style={{ marginRight: 6 }}
-                    />
-                    Active
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="statusToko"
-                      value="Inactive"
-                      checked={statusToko === "Inactive"}
-                      onChange={() => setStatusToko("Inactive")}
-                      style={{ marginRight: 6 }}
-                    />
-                    Inactive
-                  </label>
-                </div>
               </div>
               <div style={{ display: "flex", gap: 12 }}>
                 <button

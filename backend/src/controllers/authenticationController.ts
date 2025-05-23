@@ -15,13 +15,6 @@ export async function register(req: Request, res: Response, next: NextFunction) 
         return next(new ApiError(400, 'All fields are required'));
     }
 
-    console.log("DATA: ");
-    console.log("username: ", username);
-    console.log("emaik: ", email);
-    console.log("password: ", password);
-    console.log("nama: ", nama);
-    console.log("noTelp: ", nomorTelpon);
-
     try {
         const ENCRYPT_SECRET = process.env.ENCRYPT_SECRET;
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -42,7 +35,6 @@ export async function register(req: Request, res: Response, next: NextFunction) 
             email: encryptField(email, ENCRYPT_SECRET),
             nama: encryptField(nama, ENCRYPT_SECRET),
             nomorTelpon: encryptField(nomorTelpon, ENCRYPT_SECRET),
-            statusMember: encryptField('buyer', ENCRYPT_SECRET),
             password: hashedPassword,
             waktuJoin: new Date(),
         };

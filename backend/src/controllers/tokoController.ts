@@ -55,30 +55,22 @@ export const createToko = async (req: Request, res: Response, next: NextFunction
             return next(new ApiError(401, 'Unauthorized: User not authenticated'));
         }
 
-        const { namaToko, lokasiToko, statusToko } = req.body;
+        const { namaToko, lokasiToko } = req.body;
         const userId = req.user.userId;
 
-        if (!namaToko || !lokasiToko || !statusToko) {
+        if (!namaToko || !lokasiToko) {
             return next(new ApiError(400, 'Missing required fields'));
         }
 
-        const user = await User.findByPk(userId);
-        if (!user) {
-            return next(new ApiError(404, 'User not found'));
-        }
         const existingToko = await Toko.findOne({ where: { userId } });
         if (existingToko) {
             return next(new ApiError(400, 'User already has a toko'));
         }
 
-        user.statusMember = 'seller';
-        await user.save();
-
         const newToko = {
             userId,
             namaToko,
-            lokasiToko,
-            statusToko
+            lokasiToko
         };
 
         const toko = await Toko.create(newToko);
@@ -99,11 +91,10 @@ export const updateToko = async (req: Request, res: Response, next: NextFunction
             return next(new ApiError(404, 'Toko not found'));
         }
 
-        const { namaToko, lokasiToko, statusToko } = req.body;
+        const { namaToko, lokasiToko } = req.body;
         const updateData: any = {};
         if (namaToko !== undefined) updateData.namaToko = namaToko;
         if (lokasiToko !== undefined) updateData.lokasiToko = lokasiToko;
-        if (statusToko !== undefined) updateData.statusToko = statusToko;
 
         await toko.update(updateData);
         res.json(toko);

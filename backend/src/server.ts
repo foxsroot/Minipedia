@@ -4,9 +4,7 @@ import { errorHandler } from "./middlewares/errorHandler";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import barangRoutes from "./routes/barangRoutes";
-import notifikasiRoutes from "./routes/notifikasiRoutes";
 import orderRoutes from "./routes/orderRoutes";
-import laporanRoutes from "./routes/laporanRoutes";
 import tokoRouter from "./routes/tokoRoutes";
 
 const app = express();
@@ -26,9 +24,7 @@ app.use(json());
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/barang", barangRoutes);
-app.use("/api/notifikasi", notifikasiRoutes);
 app.use("/api/order", orderRoutes);
-app.use("/api/laporan", laporanRoutes);
 app.use("/api/toko", tokoRouter);
 // Routes end
 

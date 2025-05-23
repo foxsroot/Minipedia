@@ -23,11 +23,24 @@ module.exports = {
         allowNull: false,
       },
       hargaBarang: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.DOUBLE,
         allowNull: false,
       },
       kategoriProduk: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM(
+          "ELECTRONICS",
+          "FASHION",
+          "BEAUTY_HEALTH",
+          "HOME_LIVING",
+          "AUTOMOTIVE",
+          "SPORTS_OUTDOORS",
+          "HOBBIES",
+          "BOOKS",
+          "BABY_TOYS",
+          "FOOD_BEVERAGES",
+          "OFFICE_SUPPLIES",
+          "OTHER"
+        ),
         allowNull: false,
       },
       diskonProduk: {

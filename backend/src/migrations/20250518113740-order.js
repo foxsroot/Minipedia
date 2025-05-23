@@ -42,16 +42,16 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      penerima: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
       pengiriman: {
         type: Sequelize.STRING,
         allowNull: false,
       },
       tanggalBarangDiterima: {
         type: Sequelize.DATE,
+        allowNull: true,
+      },
+      statusPengiriman: {
+        type: Sequelize.ENUM("PACKED", "SHIPPED", "DELIVERED", "COMPLETED"),
         allowNull: true,
       },
       createdAt: {
