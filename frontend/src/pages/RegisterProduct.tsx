@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container, TextField, Typography, Button, Grid, Paper, Box, Snackbar, Alert
 } from '@mui/material';
-import axios from 'axios';
 
 const CreateItem: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +14,7 @@ const CreateItem: React.FC = () => {
   });
 
   const [snackbar, setSnackbar] = useState({ open: false, success: false, message: '' });
-
+  const navigate = useNavigate();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -23,39 +23,48 @@ const CreateItem: React.FC = () => {
     e.preventDefault();
 
     try {
-      const payload = {
-        ...formData,
-        stokBarang: Number(formData.stokBarang),
-        hargaBarang: Number(formData.hargaBarang),
-      };
+        const payload = {
+            ...formData,
+            stokBarang: Number(formData.stokBarang),
+            hargaBarang: Number(formData.hargaBarang),
+        };
 
-      const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token");
         if (!token) {
-        navigate("/login"); // or use window.location.href = "/login"
-        return;
+            navigate("/login");
+            return;
         }
 
-        await axios.post('/api/barang', payload, {
-        headers: {
+        const response = await fetch("/api/barang", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
-        },
+            },
+            body: JSON.stringify(payload),
         });
 
-      setSnackbar({ open: true, success: true, message: 'Barang berhasil ditambahkan!' });
-      setFormData({
-        namaBarang: '',
-        deskripsiBarang: '',
-        stokBarang: '',
-        hargaBarang: '',
-        kategoriProduk: '',
-      });
-    } catch (error: any) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-            window.location.href = "/login"; // or use navigate("/login")
-        } else {
-            setSnackbar({ open: true, success: false, message: 'Gagal menambahkan barang.' });
+        if (response.status === 401) {
+            navigate("/auth/login");
+            return;
         }
-    }
+
+        if (!response.ok) {
+            throw new Error("Gagal menambahkan barang.");
+        }
+
+        setSnackbar({ open: true, success: true, message: 'Barang berhasil ditambahkan!' });
+        setFormData({
+            namaBarang: '',
+            deskripsiBarang: '',
+            stokBarang: '',
+            hargaBarang: '',
+            kategoriProduk: '',
+        });
+        } catch (error: any) {
+        setSnackbar({ open: true, success: false, message: error.message || 'Terjadi kesalahan.' });
+        }
+
   };
 
   return (

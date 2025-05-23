@@ -6,7 +6,7 @@ import Home from "./pages/Home";
 import Development from "./pages/Development";
 import RegisterToko from "./pages/RegisterToko";
 import UpdateToko from "./pages/UpdateToko";
-import CreateItem from "./pages/addProduct";
+import CreateItem from "./pages/RegisterProduct";
 import "./styles/main.css";
 
 const App = () => {
