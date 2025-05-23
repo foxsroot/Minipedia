@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import NavigationBar from "../components/NavigationBar";
+import SellerSidebar from "../components/SellerSidebar";
 
 const UpdateToko = () => {
   const [namaToko, setNamaToko] = useState("");
@@ -18,7 +19,6 @@ const UpdateToko = () => {
         });
         if (response.ok) {
           const data = await response.json();
-          // getCurrentUserTokos returns an array, use the first toko
           const toko = Array.isArray(data) ? data[0] : data;
           setNamaToko(toko?.namaToko || "");
           setLokasiToko(toko?.lokasiToko || "");
@@ -57,131 +57,109 @@ const UpdateToko = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="home-tokopedia-bg" style={{ minHeight: "100vh" }}>
-        <NavigationBar />
-        <div className="home-tokopedia-content" style={{
-          display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh"
-        }}>
-          Loading...
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="home-tokopedia-bg" style={{ minHeight: "100vh" }}>
+    <div>
       <NavigationBar />
-      <div
-        className="home-tokopedia-content"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "80vh",
-        }}
-      >
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            background: "white",
-            padding: "2rem 2.5rem",
-            borderRadius: "16px",
-            boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
-            minWidth: "320px",
-            maxWidth: "400px",
-            width: "100%",
-          }}
-        >
-          <h2 style={{ marginBottom: "1.5rem", color: "#03ac0e" }}>
+      <div style={{ display: "flex" }}>
+        <SellerSidebar />
+        <main style={{ flex: 1, padding: "2rem 0 2rem 2rem", background: "#f8f9fb", minHeight: "100vh" }}>
+          <h2 style={{ marginBottom: "2rem", color: "black", textAlign: "left" }}>
             Update Toko Anda
           </h2>
-          <div style={{ marginBottom: "1rem" }}>
-            <label htmlFor="namaToko" style={{ display: "block", marginBottom: 4 }}>
-              Nama Toko
-            </label>
-            <input
-              id="namaToko"
-              type="text"
-              value={namaToko}
-              onChange={(e) => setNamaToko(e.target.value)}
-              required
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                borderRadius: "8px",
-                border: "1px solid #ccc",
-              }}
-            />
-          </div>
-          <div style={{ marginBottom: "1rem" }}>
-            <label htmlFor="lokasiToko" style={{ display: "block", marginBottom: 4 }}>
-              Lokasi Toko
-            </label>
-            <input
-              id="lokasiToko"
-              type="text"
-              value={lokasiToko}
-              onChange={(e) => setLokasiToko(e.target.value)}
-              required
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                borderRadius: "8px",
-                border: "1px solid #ccc",
-              }}
-            />
-          </div>
-          <div style={{ marginBottom: "1.5rem" }}>
-            <label style={{ display: "block", marginBottom: 4 }}>
-              Status Toko
-            </label>
-            <div>
-              <label style={{ marginRight: "1rem" }}>
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "2rem" }}>Loading...</div>
+          ) : (
+            <form onSubmit={handleSubmit} style={{ maxWidth: 800 }}>
+              <div style={{ marginBottom: "1.5rem" }}>
+                <label htmlFor="namaToko" style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>
+                  Nama Toko
+                </label>
                 <input
-                  type="radio"
-                  name="statusToko"
-                  value="Active"
-                  checked={statusToko === "Active"}
-                  onChange={() => setStatusToko("Active")}
-                  style={{ marginRight: 4 }}
+                  id="namaToko"
+                  type="text"
+                  value={namaToko}
+                  onChange={(e) => setNamaToko(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "0.75rem",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                    fontSize: "1rem",
+                  }}
                 />
-                Active
-              </label>
-              <label>
+              </div>
+              <div style={{ marginBottom: "1.5rem" }}>
+                <label htmlFor="lokasiToko" style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>
+                  Lokasi Toko
+                </label>
                 <input
-                  type="radio"
-                  name="statusToko"
-                  value="Inactive"
-                  checked={statusToko === "Inactive"}
-                  onChange={() => setStatusToko("Inactive")}
-                  style={{ marginRight: 4 }}
+                  id="lokasiToko"
+                  type="text"
+                  value={lokasiToko}
+                  onChange={(e) => setLokasiToko(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "0.75rem",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                    fontSize: "1rem",
+                  }}
                 />
-                Inactive
-              </label>
-            </div>
-          </div>
-          <button
-            type="submit"
-            style={{
-              width: "100%",
-              background: "#03ac0e",
-              color: "white",
-              padding: "0.75rem",
-              border: "none",
-              borderRadius: "8px",
-              fontWeight: "bold",
-              fontSize: "1rem",
-              cursor: "pointer",
-            }}
-          >
-            Update Toko
-          </button>
-          {message && (
-            <div style={{ marginTop: "1rem", color: "#d32f2f" }}>{message}</div>
+              </div>
+              <div style={{ marginBottom: "2rem" }}>
+                <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>
+                  Status Toko
+                </label>
+                <div>
+                  <label style={{ marginRight: "2rem" }}>
+                    <input
+                      type="radio"
+                      name="statusToko"
+                      value="Active"
+                      checked={statusToko === "Active"}
+                      onChange={() => setStatusToko("Active")}
+                      style={{ marginRight: 6 }}
+                    />
+                    Active
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="statusToko"
+                      value="Inactive"
+                      checked={statusToko === "Inactive"}
+                      onChange={() => setStatusToko("Inactive")}
+                      style={{ marginRight: 6 }}
+                    />
+                    Inactive
+                  </label>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 12 }}>
+                <button
+                  type="submit"
+                  style={{
+                    background: "#03ac0e",
+                    color: "white",
+                    padding: "0.75rem 2.5rem",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontWeight: "bold",
+                    fontSize: "1rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  Update Toko
+                </button>
+                {message && (
+                  <div style={{ marginLeft: 16, color: "#d32f2f", alignSelf: "center" }}>{message}</div>
+                )}
+              </div>
+            </form>
           )}
-        </form>
+        </main>
       </div>
     </div>
   );
