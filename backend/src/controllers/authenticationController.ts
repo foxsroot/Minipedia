@@ -3,7 +3,7 @@ import Redis from "ioredis";
 import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError";
 import { User } from '../models/User';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import { encryptField, decryptField } from "../utils/encryption";
 
 const redis = new Redis();
@@ -19,9 +19,9 @@ export async function register(req: Request, res: Response, next: NextFunction) 
         if (!ENCRYPT_SECRET || ENCRYPT_SECRET.length !== 64) {
             return next(new ApiError(500, 'ENCRYPT_SECRET must be a 64-character hex string'));
         }
-        
+
         const decryptedEmail = decryptField(email, ENCRYPT_SECRET);
-        
+
         const existingUser = await User.findOne({ where: { decryptedEmail } });
         if (existingUser) {
             return next(new ApiError(409, 'Email already registered'));
