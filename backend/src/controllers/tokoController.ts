@@ -70,6 +70,10 @@ export const createToko = async (req: Request, res: Response, next: NextFunction
         if (existingToko) {
             return next(new ApiError(400, 'User already has a toko'));
         }
+
+        user.statusMember = 'seller';
+        await user.save();
+
         const newToko = {
             userId,
             namaToko,

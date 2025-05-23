@@ -15,8 +15,9 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 const Register = () => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+  const [nama, setNama] = useState("");
   const [password, setPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [nomorTelepon, setNomorTelepon] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -37,7 +38,7 @@ const Register = () => {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, username, phoneNumber, password }),
+        body: JSON.stringify({ email, username, nama, nomorTelepon, password }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -46,7 +47,8 @@ const Register = () => {
         setSuccess(true);
         setEmail("");
         setUsername("");
-        setPhoneNumber("");
+        setNama("");
+        setNomorTelepon("");
         setPassword("");
         setConfirmPassword("");
         setTimeout(() => {
@@ -154,11 +156,28 @@ const Register = () => {
         />
 
         <TextField
+          label="Name"
+          variant="outlined"
+          type="text"
+          value={nama}
+          onChange={(e) => setNama(e.target.value)}
+          required
+          fullWidth
+          size="medium"
+          sx={{
+            bgcolor: "#f8f8f8",
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+            },
+          }}
+        />
+
+        <TextField
           label="phoneNumber"
           variant="outlined"
           type="text"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
+          value={nomorTelepon}
+          onChange={(e) => setNomorTelepon(e.target.value)}
           required
           fullWidth
           size="medium"

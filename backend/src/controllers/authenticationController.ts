@@ -10,8 +10,8 @@ const redis = new Redis();
 
 export async function register(req: Request, res: Response, next: NextFunction) {
     try {
-        const { username, email, password, nama, nomorTelpon, statusMember } = req.body;
-        if (!username || !email || !password || !nama || !nomorTelpon || !statusMember) {
+        const { username, email, password, nama, nomorTelpon } = req.body;
+        if (!username || !email || !password || !nama || !nomorTelpon) {
             return next(new ApiError(400, 'All fields are required'));
         }
         const ENCRYPT_SECRET = process.env.ENCRYPT_SECRET;
@@ -26,13 +26,13 @@ export async function register(req: Request, res: Response, next: NextFunction) 
         if (existingUser) {
             return next(new ApiError(409, 'Email already registered'));
         }
-
+    
         const encryptedUser = {
             username: encryptField(username, ENCRYPT_SECRET),
             email: encryptField(email, ENCRYPT_SECRET),
             nama: encryptField(nama, ENCRYPT_SECRET),
             nomorTelpon: encryptField(nomorTelpon, ENCRYPT_SECRET),
-            statusMember: encryptField(statusMember, ENCRYPT_SECRET),
+            statusMember: encryptField('buyer', ENCRYPT_SECRET),
             password: hashedPassword,
             waktuJoin: new Date(),
         };
