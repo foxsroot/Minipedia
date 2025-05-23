@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Development from "./pages/Development";
+import RegisterToko from "./pages/RegisterToko";
 import "./styles/main.css";
 
 const App = () => {
@@ -14,6 +15,7 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Home />} />
         <Route path="/dev" element={<Development />} />
+        <Route path="/register-toko" element={<RegisterToko />} />
         {/* 
         <Route path="/u/:username" element={
           <ProtectedRoute>

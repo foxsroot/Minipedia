@@ -1,11 +1,7 @@
 {
   "development": {
     "username": "postgres",
-<<<<<<< HEAD
     "password": "ithb2025",
-=======
-    "password": "admin",
->>>>>>> 4268e0b9e42d206f88db14e2c7fe6de4d045ed74
     "database": "minipedia",
     "host": "127.0.0.1",
     "dialect": "postgres"
