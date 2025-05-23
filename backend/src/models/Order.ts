@@ -63,12 +63,6 @@ export class Order extends Model {
         type: DataType.STRING,
         allowNull: false
     })
-    declare penerima: string;
-
-    @Column({
-        type: DataType.STRING,
-        allowNull: false
-    })
     declare pengiriman: string;
 
     @Column({
@@ -76,6 +70,12 @@ export class Order extends Model {
         allowNull: true
     })
     declare tanggalBarangDiterima: Date;
+
+    @Column({
+        type: DataType.ENUM("PACKED", "SHIPPED", "DELIVERED", "COMPLETED"),
+        allowNull: true
+    })
+    declare statusPengiriman: string
 
     @Column({
         type: DataType.DATE,

@@ -34,16 +34,23 @@ export class Barang extends Model {
     declare stokBarang: number;
 
     @Column({
-        type: DataType.INTEGER,
+        type: DataType.DOUBLE,
         allowNull: false
     })
     declare hargaBarang: number;
 
     @Column({
-        type: DataType.STRING,
+        type: DataType.ENUM("ELECTRONICS", "FASHION", "BEAUTY_HEALTH", "HOME_LIVING", "AUTOMOTIVE", "SPORTS_OUTDOORS", "HOBBIES", "BOOKS", "BABY_TOYS", "FOOD_BEVERAGES", "OFFICE_SUPPLIES", "OTHER"),
         allowNull: false
     })
     declare kategoriProduk: string;
+
+    @Column({
+        type: DataType.FLOAT,
+        allowNull: false,
+        defaultValue: 0
+    })
+    declare diskonProduk: number;
 
     @ForeignKey(() => Toko)
     @Column({

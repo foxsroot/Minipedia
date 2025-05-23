@@ -30,6 +30,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      diskonProduk: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+        defaultValue: 0,
+      },
       tokoId: {
         type: Sequelize.UUID,
         allowNull: false,

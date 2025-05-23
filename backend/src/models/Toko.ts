@@ -35,12 +35,6 @@ export class Toko extends Model {
     declare lokasiToko: string;
 
     @Column({
-        type: DataType.STRING,
-        allowNull: false
-    })
-    declare statusToko: string;
-
-    @Column({
         type: DataType.DATE,
         allowNull: false,
         defaultValue: DataType.NOW

@@ -47,12 +47,6 @@ export class User extends Model {
     declare password: string;
 
     @Column({
-        type: DataType.STRING,
-        allowNull: false
-    })
-    declare statusMember: string;
-
-    @Column({
         type: DataType.DATE,
         allowNull: false,
         defaultValue: DataType.NOW
