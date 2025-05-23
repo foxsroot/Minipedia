@@ -16,6 +16,7 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -33,10 +34,10 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch("/api/register", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, username, password }),
+        body: JSON.stringify({ email, username, phoneNumber, password }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -45,6 +46,7 @@ const Register = () => {
         setSuccess(true);
         setEmail("");
         setUsername("");
+        setPhoneNumber("");
         setPassword("");
         setConfirmPassword("");
         setTimeout(() => {
@@ -140,6 +142,23 @@ const Register = () => {
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          required
+          fullWidth
+          size="medium"
+          sx={{
+            bgcolor: "#f8f8f8",
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+            },
+          }}
+        />
+
+        <TextField
+          label="phoneNumber"
+          variant="outlined"
+          type="text"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
           required
           fullWidth
           size="medium"
