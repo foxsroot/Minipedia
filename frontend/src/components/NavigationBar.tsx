@@ -11,7 +11,12 @@ import {
   ButtonBase,
 } from "@mui/material";
 import { styled, alpha } from "@mui/material/styles";
-import { FaSearch, FaRegUserCircle } from "react-icons/fa";
+import {
+  FaSearch,
+  FaRegUserCircle,
+  FaBell,
+  FaShoppingCart,
+} from "react-icons/fa";
 
 type UserType = { name: string; avatar: string; notifications: number };
 const users: UserType[] = [
@@ -115,6 +120,18 @@ const NavigationBar = () => {
         </SearchBar>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: "1.2rem" }}>
+          <IconButton title="Notifications" sx={{ color: "#222" }}>
+            <Badge badgeContent={3} color="error">
+              <FaBell size={20} />
+            </Badge>
+          </IconButton>
+
+          <IconButton title="Cart" sx={{ color: "#222" }}>
+            <Badge badgeContent={2} color="error">
+              <FaShoppingCart size={20} />
+            </Badge>
+          </IconButton>
+
           {!user ? (
             <Link to="/login" style={{ textDecoration: "none" }}>
               <UserIconLink title="Login">
