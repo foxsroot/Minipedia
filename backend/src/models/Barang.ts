@@ -22,6 +22,13 @@ export class Barang extends Model {
     declare namaBarang: string;
 
     @Column({
+        type: DataType.STRING,
+        allowNull: true,
+        field: 'foto_barang',
+    })
+    declare fotoBarang: string;
+
+    @Column({
         type: DataType.TEXT,
         allowNull: false
     })
@@ -29,7 +36,8 @@ export class Barang extends Model {
 
     @Column({
         type: DataType.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     })
     declare stokBarang: number;
 

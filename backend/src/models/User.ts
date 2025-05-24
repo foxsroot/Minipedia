@@ -1,9 +1,12 @@
-import { Table, Column, Model, DataType, HasOne } from "sequelize-typescript";
+import { Table, Column, Model, DataType, HasOne, HasMany } from "sequelize-typescript";
 import { Toko } from "./Toko";
+import { Order } from "./Order";
 
 @Table({
     tableName: "user",
-    timestamps: false
+    timestamps: false,
+    paranoid: true,
+    deletedAt: "deleted_at"
 })
 export class User extends Model {
     @Column({
@@ -62,4 +65,7 @@ export class User extends Model {
 
     @HasOne(() => Toko)
     declare toko?: Toko;
+
+    @HasMany(() => Order)
+    declare order?: Order[];
 }

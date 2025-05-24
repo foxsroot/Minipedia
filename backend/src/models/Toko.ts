@@ -4,14 +4,16 @@ import { Barang } from "./Barang";
 
 @Table({
     tableName: "toko",
-    timestamps: false
+    timestamps: false,
+    paranoid: true,
+    deletedAt: "deleted_at"
 })
 export class Toko extends Model {
     @Column({
         primaryKey: true,
         type: DataType.UUID,
         defaultValue: DataType.UUIDV4,
-        allowNull: false
+        allowNull: false,
     })
     declare tokoId: string;
 

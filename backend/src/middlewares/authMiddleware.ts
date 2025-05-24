@@ -13,8 +13,7 @@ const redis = new Redis();
 
 export interface AuthPayload {
     userId: string;
-    username: string;
-    email: string;
+    tokoId: string;
 }
 
 export function authenticateToken(req: Request, res: Response, next: NextFunction) {

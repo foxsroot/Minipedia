@@ -42,8 +42,9 @@ export class Order extends Model {
     declare namaPenerima: string;
 
     @Column({
-        type: DataType.STRING,
-        allowNull: false
+        type: DataType.ENUM("PENDING", "PROCESSING", "SHIPPING", "COMPLETED", "CANCELED"),
+        allowNull: false,
+        defaultValue: "PENDING"
     })
     declare statusPesanan: string;
 
@@ -72,8 +73,8 @@ export class Order extends Model {
     declare tanggalBarangDiterima: Date;
 
     @Column({
-        type: DataType.ENUM("PACKED", "SHIPPED", "DELIVERED", "COMPLETED"),
-        allowNull: true
+        type: DataType.ENUM("PACKED", "SHIPPED", "DELIVERED"),
+        allowNull: true,
     })
     declare statusPengiriman: string
 

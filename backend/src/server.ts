@@ -9,15 +9,6 @@ import tokoRouter from "./routes/tokoRoutes";
 
 const app = express();
 
-sequelize
-    .sync()
-    .then(() => {
-        console.log("Database synced!");
-    })
-    .catch((err) => {
-        console.log("Failed to sync database:", err);
-    });
-
 app.use(json());
 
 // Routes start
@@ -30,6 +21,19 @@ app.use("/api/toko", tokoRouter);
 
 app.use(errorHandler);
 
-app.listen(process.env.PORT, () => {
-    console.log("App started at port 3000");
-});
+export default app;
+
+// Only start the server if this file is run directly
+if (require.main === module) {
+    sequelize
+        .sync()
+        .then(() => {
+            console.log("Database synced!");
+            app.listen(process.env.PORT || 3000, () => {
+                console.log("App started at port 3000");
+            });
+        })
+        .catch((err) => {
+            console.log("Failed to sync database:", err);
+        });
+}

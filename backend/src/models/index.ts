@@ -20,4 +20,4 @@ const sequelize = new Sequelize({
     models: [User, Toko, Barang, Order, OrderItem],
 });
 
-export { sequelize };
+export { sequelize, User, Toko, Barang, Order, OrderItem };
