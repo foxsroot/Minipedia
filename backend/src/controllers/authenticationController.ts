@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError";
 import { User } from '../models/User';
 import bcrypt from 'bcrypt';
-import { encryptField, decryptField } from "../utils/encryption";
+import { decryptUserFields, encryptField } from "../utils/encryption";
+import { Toko } from "../models";
 
 const redis = new Redis();
 
@@ -18,6 +19,7 @@ export async function register(req: Request, res: Response, next: NextFunction) 
     try {
         const ENCRYPT_SECRET = process.env.ENCRYPT_SECRET;
         const hashedPassword = await bcrypt.hash(password, 10);
+
         if (!ENCRYPT_SECRET || ENCRYPT_SECRET.length !== 64) {
             return next(new ApiError(500, 'ENCRYPT_SECRET must be a 64-character hex string'));
         }
@@ -38,8 +40,9 @@ export async function register(req: Request, res: Response, next: NextFunction) 
             password: hashedPassword,
             waktuJoin: new Date(),
         };
+
         const user = await User.create(encryptedUser);
-        res.status(201).json({ message: 'Registration successful', user });
+        res.status(201).json({ message: 'Registration successful', userId: user.userId });
     } catch (err) {
         console.log(err);
         next(err);
@@ -49,44 +52,65 @@ export async function register(req: Request, res: Response, next: NextFunction) 
 export async function login(req: Request, res: Response, next: NextFunction) {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
             return next(new ApiError(400, 'Email and password are required'));
         }
+
         const ENCRYPT_SECRET = process.env.ENCRYPT_SECRET;
+
         if (!ENCRYPT_SECRET || ENCRYPT_SECRET.length !== 64) {
-            return next(new ApiError(500, 'ENCRYPT_SECRET must be a 64-character hex string'));
+            return next(new ApiError(500, 'ENCRYPT_SECRET Not Defined or Invalid'));
         }
 
         const users = await User.findAll();
         let user = null;
+
         for (const u of users) {
-            const decryptedEmail = decryptField(u.email, ENCRYPT_SECRET);
+            const decryptedEmail = decryptUserFields(u).email;
             if (decryptedEmail === email) {
                 user = u;
                 break;
             }
         }
+
         if (!user) {
+            console.log('User not found');
             return next(new ApiError(401, 'Invalid email or password'));
         }
+
         const valid = await bcrypt.compare(password, user.password);
+
         if (!valid) {
+            console.log('Invalid password');
             return next(new ApiError(401, 'Invalid email or password'));
         }
+
         const payload = {
             userId: user.userId,
-            username: decryptField(user.username, ENCRYPT_SECRET),
-            email: decryptField(user.email, ENCRYPT_SECRET)
+            tokoId: ""
         };
+
+        const toko = await Toko.findOne({
+            where: { userId: user.userId },
+        })
+
+        if (toko) {
+            payload.tokoId = toko.tokoId;
+        }
+
         const JWT_SECRET = process.env.JWT_TOKEN_SECRET;
+
         if (!JWT_SECRET) {
             throw new Error('JWT_SECRET is not defined in the environment variables.');
         }
+
         const expiresIn = parseInt(process.env.JWT_EXPIRES_IN || '604800', 10);
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn });
+
         res.status(200).json({ message: 'Login successful', token });
     } catch (err) {
-        next(err);
+        return next(new ApiError(500, 'Login failed'));
     }
 }
 
@@ -123,10 +147,4 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
         }
         next(new ApiError(500, "Logout failed"));
     }
-}
-
-export async function test(req: Request, res: Response, next: NextFunction) {
-    res.status(200).json({
-        message: "Test success"
-    })
 }

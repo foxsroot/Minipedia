@@ -19,18 +19,37 @@ export function decryptField(encrypted: string, secret: string): string {
 
 export function decryptUserFields(user: any): any {
     const ENCRYPT_SECRET = process.env.ENCRYPT_SECRET;
+
     if (!ENCRYPT_SECRET || ENCRYPT_SECRET.length !== 64) {
-        throw new Error('ENCRYPT_SECRET must be a 64-character hex string');
+        throw new Error('ENCRYPT_SECRET must be a 64-character hex string for decryption.');
     }
 
     const u = user.toJSON ? user.toJSON() : { ...user };
-    return {
-        ...u,
-        username: u.username ? decryptField(u.username, ENCRYPT_SECRET) : undefined,
-        email: u.email ? decryptField(u.email, ENCRYPT_SECRET) : undefined,
-        nama: u.nama ? decryptField(u.nama, ENCRYPT_SECRET) : undefined,
-        nomorTelpon: u.nomorTelpon ? decryptField(u.nomorTelpon, ENCRYPT_SECRET) : undefined,
-        statusMember: u.statusMember ? decryptField(u.statusMember, ENCRYPT_SECRET) : undefined,
-        password: undefined,
-    };
+    const decryptedFields: any = { ...u };
+
+    try {
+        if (u.username) {
+            decryptedFields.username = decryptField(u.username, ENCRYPT_SECRET);
+        }
+        if (u.email) {
+            decryptedFields.email = decryptField(u.email, ENCRYPT_SECRET);
+        }
+        if (u.nama) {
+            decryptedFields.nama = decryptField(u.nama, ENCRYPT_SECRET);
+        }
+        if (u.nomorTelpon) {
+            decryptedFields.nomorTelpon = decryptField(u.nomorTelpon, ENCRYPT_SECRET);
+        }
+    } catch (e) {
+        console.warn("Error during user field decryption. Returning original (potentially encrypted) values.", e);
+
+        return {
+            ...u,
+            password: undefined,
+        };
+    }
+
+    decryptedFields.password = undefined;
+
+    return decryptedFields;
 }
