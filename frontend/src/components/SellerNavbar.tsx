@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AppBar,
@@ -12,13 +13,11 @@ import {
 import { styled } from "@mui/material/styles";
 import { FaRegUserCircle, FaShoppingCart } from "react-icons/fa";
 
-type UserType = { name: string; avatar: string; notifications: number };
-const users: UserType[] = [
-  { name: "John Doe", avatar: "/john.png", notifications: 5 },
-  { name: "Jane Smith", avatar: "/jane.png", notifications: 0 },
-];
-const user = null as UserType | null;
-// const user = users[1];
+type UserType = {
+  name: string;
+  avatar: string;
+  notifications: number;
+};
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -69,6 +68,42 @@ const UserName = styled("span")(({ theme }) => ({
 }));
 
 const SellerNavbar = () => {
+  const [user, setUser] = useState<UserType | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        const res = await fetch("/api/user/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUser({
+            name: data.nama,
+            avatar: data.avatar || "/default.png",
+            notifications: data.notifications || 0,
+          });
+        } else {
+          setUser(null);
+        }
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
+
   return (
     <StyledAppBar position="sticky" elevation={0}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -79,33 +114,29 @@ const SellerNavbar = () => {
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: "1.2rem" }}>
-          <IconButton title="Cart" sx={{ color: "#222" }}>
-            <Badge badgeContent={2} color="error">
-              <FaShoppingCart size={20} />
-            </Badge>
-          </IconButton>
-
-          {!user ? (
+          {!loading && !user ? (
             <Link to="/login" style={{ textDecoration: "none" }}>
               <UserIconLink title="Login">
                 <FaRegUserCircle size={22} />
               </UserIconLink>
             </Link>
           ) : (
-            <ButtonBase
-              component={Link}
-              to="/profile"
-              sx={{ display: "flex", alignItems: "center" }}
-            >
-              <Badge badgeContent={user.notifications} color="error">
-                <Avatar
-                  alt={user.name}
-                  src={user.avatar || "/default.png"}
-                  sx={{ width: 40, height: 40 }}
-                />
-              </Badge>
-              <UserName>{user.name}</UserName>
-            </ButtonBase>
+            user && (
+              <ButtonBase
+                component={Link}
+                to="/profile"
+                sx={{ display: "flex", alignItems: "center" }}
+              >
+                <Badge badgeContent={user.notifications} color="error">
+                  <Avatar
+                    alt={user.name}
+                    src={user.avatar}
+                    sx={{ width: 40, height: 40 }}
+                  />
+                </Badge>
+                <UserName>{user.name}</UserName>
+              </ButtonBase>
+            )
           )}
         </Box>
       </Toolbar>
