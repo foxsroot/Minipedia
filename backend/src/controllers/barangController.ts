@@ -18,27 +18,21 @@ export const getBarangById = async (req: Request, res: Response, next: NextFunct
 
 export const getAllBarangs = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // const barangs = await Barang.findAll({
-        //     include: [
-        //         {
-        //             model: Toko,
-        //             as: 'toko',
-        //             attributes: ['namaToko', 'lokasiToko']
-        //         }
-        //     ]
-        // });
-
-        const barangs = await Barang.findAll();
-
-        console.log(barangs);
+        const barangs = await Barang.findAll({
+            include: [
+                {
+                    model: Toko,
+                    as: 'toko',
+                    attributes: ['namaToko', 'lokasiToko']
+                }
+            ]
+        });
 
         const barangIds = barangs.map(b => b.barangId);
 
         const orderItems = await OrderItem.findAll({
             where: { barangId: barangIds }
         });
-
-        console.log(orderItems);
 
         const jumlahTerjualMap: { [key: string]: number } = {};
 
@@ -47,14 +41,10 @@ export const getAllBarangs = async (req: Request, res: Response, next: NextFunct
             jumlahTerjualMap[id] = (jumlahTerjualMap[id] || 0) + item.quantity;
         });
 
-        console.log(barangs);
-
         const result = barangs.map(barang => ({
             ...barang.toJSON(),
             jumlahTerjual: jumlahTerjualMap[barang.barangId] || 0
         }));
-
-        console.log(result);
 
         res.status(200).json(result);
     } catch (err) {
@@ -68,6 +58,20 @@ export const createBarang = async (req: Request, res: Response, next: NextFuncti
     }
 
     const tokoId = req.user.tokoId;
+
+    try {
+        const hargaBarangNumber = parseFloat(req.body.hargaBarang);
+
+        if (isNaN(hargaBarangNumber) || hargaBarangNumber < 0) {
+            return next(new ApiError(400, 'Invalid hargaBarang format'));
+        }
+    } catch (err) {
+        return next(new ApiError(400, 'Invalid hargaBarang format'));
+    }
+
+    if (req.body.hargaBarang <= 0) {
+        return next(new ApiError(400, 'User doesn\'t have a toko'));
+    }
 
     try {
         const barang = await Barang.create(
@@ -86,6 +90,7 @@ export const createBarang = async (req: Request, res: Response, next: NextFuncti
             barangId: barang.barangId
         });
     } catch (err) {
+        console.error(err);
         return next(new ApiError(500, 'Failed to create barang'));
     }
 };

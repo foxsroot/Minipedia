@@ -4,11 +4,13 @@ export interface Barang {
     barangId: string;
     namaBarang: string;
     fotoBarang: string;
-    deskripsiBarang: number;
+    deskripsiBarang: string;
     stokBarang: number;
     hargaBarang: number;
     kategoriProduk: string;
     diskonProduk?: number;
     toko: TokoSummary;
     jumlahTerjual: number;
+    createdAt?: Date;
+    updatedAt?: Date;
 }

@@ -10,30 +10,37 @@ import ManageProduct from "./pages/ManageProduct";
 import SellerHomepage from "./pages/SellerHomepage";
 import ManageOrder from "./pages/ManageOrder";
 import "./styles/main.css";
+import ProductDetail from "./pages/ProductDetail";
+import { CartProvider } from "./contexts/CartContext";
+import Cart from "./pages/Cart";
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/dev" element={<Development />} />
-        <Route path="/register-toko" element={<RegisterToko />} />
-        <Route path="/update-toko" element={<UpdateToko />} />
-        <Route path="/add-product" element={<CreateItem />} />
-        <Route path="/seller-homepage" element={<SellerHomepage />} />
-        <Route path="/manage-product" element={<ManageProduct />} />
-        <Route path="/manage-order" element={<ManageOrder />} />
-        {/* 
+    <CartProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/dev" element={<Development />} />
+          <Route path="/register-toko" element={<RegisterToko />} />
+          <Route path="/update-toko" element={<UpdateToko />} />
+          <Route path="/add-product" element={<CreateItem />} />
+          <Route path="/seller-homepage" element={<SellerHomepage />} />
+          <Route path="/manage-product" element={<ManageProduct />} />
+          <Route path="/manage-order" element={<ManageOrder />} />
+          <Route path="/product/:barangId" element={<ProductDetail />} />
+          <Route path="/cart" element={<Cart />} />
+          {/* 
         <Route path="/u/:username" element={
           <ProtectedRoute>
             <ViewProfile />
           </ProtectedRoute>
         } />
         */}
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </CartProvider>
   );
 };
 

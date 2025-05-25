@@ -1,9 +1,16 @@
-import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
-import type { Barang } from "../interfaces/Barang";
 
 interface ItemBoxProps {
-  idBarang: string;
+  barangId: string;
+  namaBarang: string;
+  fotoBarang: string;
+  hargaBarang: number;
+  stokBarang: number;
+  diskonProduk: number;
+  jumlahTerjual: number;
+  namaToko: string;
+  lokasiToko: string;
+  deskripsiBarang?: string;
   onClick?: () => void;
 }
 
@@ -14,41 +21,24 @@ const convertTotalSold = (totalSold: number) => {
   return remainder > 50 ? `${hundreds + 50}+` : `${hundreds}+`;
 };
 
-const ItemBox: React.FC<ItemBoxProps> = ({ idBarang, onClick }) => {
-  const [barang, setBarang] = useState<Barang>();
-
+const ItemBox: React.FC<ItemBoxProps> = ({
+  barangId,
+  namaBarang,
+  onClick,
+  fotoBarang,
+  hargaBarang,
+  stokBarang,
+  diskonProduk,
+  jumlahTerjual,
+  namaToko,
+  lokasiToko,
+}) => {
   const hargaDiskon = (hargaAwal: number) => {
-    if (barang?.diskonProduk) {
-      return hargaAwal - (hargaAwal * barang.diskonProduk) / 100;
+    if (diskonProduk) {
+      return hargaAwal - (hargaAwal * diskonProduk) / 100;
     }
     return hargaAwal;
   };
-
-  const fetchToko = async (idBarang: string) => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/barang/${idBarang}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to fetch toko");
-
-      const data = await response.json();
-
-      setBarang(data);
-    } catch (error) {
-      console.error("Error fetching toko:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchToko(idBarang);
-  }, []);
 
   return (
     <Box
@@ -65,30 +55,31 @@ const ItemBox: React.FC<ItemBoxProps> = ({ idBarang, onClick }) => {
         },
         display: "flex",
         flexDirection: "column",
+        key: barangId,
       }}
       onClick={onClick}
     >
       <Box sx={{ position: "relative", width: "100%", height: 180 }}>
         <Box
           component="img"
-          src={barang?.fotoBarang}
-          alt={barang?.namaBarang}
+          src={fotoBarang}
+          alt={namaBarang}
           sx={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
             backgroundColor: "#f5f5f5",
-            filter: barang?.stokBarang === 0 ? "brightness(50%)" : "none",
+            filter: stokBarang === 0 ? "brightness(50%)" : "none",
           }}
         />
-        {barang?.stokBarang !== undefined && (
+        {stokBarang !== undefined && (
           <Box
             sx={{
               position: "absolute",
               top: 8,
               left: 8,
-              bgcolor: barang?.stokBarang === 0 ? "#d32f2f" : "#fff",
-              color: barang?.stokBarang === 0 ? "#fff" : "#d32f2f",
+              bgcolor: stokBarang === 0 ? "#d32f2f" : "#fff",
+              color: stokBarang === 0 ? "#fff" : "#d32f2f",
               fontWeight: 700,
               fontSize: "0.75rem",
               px: 1,
@@ -97,12 +88,10 @@ const ItemBox: React.FC<ItemBoxProps> = ({ idBarang, onClick }) => {
               boxShadow: 1,
             }}
           >
-            {barang?.stokBarang === 0
-              ? "Stok Habis"
-              : `${barang?.stokBarang} tersisa`}
+            {stokBarang === 0 ? "Stok Habis" : `${stokBarang} tersisa`}
           </Box>
         )}
-        {barang?.diskonProduk && (
+        {diskonProduk && (
           <Box
             sx={{
               position: "absolute",
@@ -118,7 +107,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({ idBarang, onClick }) => {
               boxShadow: 1,
             }}
           >
-            {barang?.diskonProduk}%
+            {diskonProduk}%
           </Box>
         )}
       </Box>
@@ -127,15 +116,14 @@ const ItemBox: React.FC<ItemBoxProps> = ({ idBarang, onClick }) => {
         sx={{ p: 1.5, flexGrow: 1, display: "flex", flexDirection: "column" }}
       >
         <Typography
-          variant="subNamaItem2"
+          variant="subtitle2"
           noWrap
           sx={{ fontWeight: 600, color: "#222", mb: 0.5 }}
-          namaBarang={barang?.namaBarang}
         >
-          {barang?.namaBarang}
+          {namaBarang}
         </Typography>
 
-        {barang?.hargaBarang && barang?.diskonProduk ? (
+        {hargaBarang && diskonProduk ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
             <Typography
               variant="body1"
@@ -145,7 +133,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({ idBarang, onClick }) => {
                 fontSize: "1rem",
               }}
             >
-              {hargaDiskon(barang.hargaBarang)
+              {hargaDiskon(hargaBarang)
                 .toLocaleString("id-ID", {
                   style: "currency",
                   currency: "IDR",
@@ -160,7 +148,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({ idBarang, onClick }) => {
                 fontSize: "0.75rem",
               }}
             >
-              {barang?.hargaBarang
+              {hargaBarang
                 .toLocaleString("id-ID", {
                   style: "currency",
                   currency: "IDR",
@@ -178,7 +166,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({ idBarang, onClick }) => {
               fontSize: "1rem",
             }}
           >
-            {barang?.hargaBarang
+            {hargaBarang
               .toLocaleString("id-ID", {
                 style: "currency",
                 currency: "IDR",
@@ -188,10 +176,11 @@ const ItemBox: React.FC<ItemBoxProps> = ({ idBarang, onClick }) => {
         )}
 
         <Box sx={{ fontSize: "0.75rem", color: "#666", mb: 1 }}>
-          {barang?.toko.lokasiToko && <div>{barang?.toko.lokasiToko}</div>}
-          {barang?.jumlahTerjual && (
-            <div>{convertTotalSold(barang?.jumlahTerjual)} terjual</div>
+          {lokasiToko && <div>{lokasiToko}</div>}
+          {jumlahTerjual != 0 && (
+            <div>{convertTotalSold(jumlahTerjual)} terjual</div>
           )}
+          {!jumlahTerjual && <div>Belum Terjual🤣</div>}
         </Box>
 
         <Typography
@@ -202,7 +191,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({ idBarang, onClick }) => {
             mt: "auto",
           }}
         >
-          {barang?.toko.namaToko}
+          {namaToko}
         </Typography>
       </Box>
     </Box>
