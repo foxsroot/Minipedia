@@ -21,7 +21,7 @@ const CreateItem: React.FC = () => {
     deskripsiBarang: '',
     stokBarang: '',
     hargaBarang: '',
-    kategoriProduk: '',
+    kategoriProduk: 'ELECTRONICS', // Set a default value for kategoriProduk
     foto_barang: '',
     fotoBarang: null,
   });
@@ -98,7 +98,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       deskripsiBarang: '',
       stokBarang: '',
       hargaBarang: '',
-      kategoriProduk: '',
+      kategoriProduk: 'ELECTRONICS', // Reset to default value
       foto_barang: '',
       fotoBarang: null,
     });
@@ -187,8 +187,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.kategoriProduk}
                       onChange={handleChange}
                       required
+                      sx={{
+                        "& .MuiSelect-select": {
+                          minWidth: "100%", // Ensure the dropdown spans the full width
+                        },
+                      }}
                     >
-                      {kategoriOptions.map(option => (
+                      {kategoriOptions.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
                           {option.label}
                         </MenuItem>
