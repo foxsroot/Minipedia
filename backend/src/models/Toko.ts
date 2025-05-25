@@ -50,6 +50,13 @@ export class Toko extends Model {
     })
     declare updatedAt: Date;
 
+    @Column({
+        type: DataType.DATE,
+        allowNull: true,
+        field: 'deleted_at'
+    })
+    declare deletedAt: Date | null;
+
     @BelongsTo(() => User)
     declare user: User;
 
