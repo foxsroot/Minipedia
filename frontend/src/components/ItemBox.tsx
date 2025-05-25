@@ -1,16 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
+import type { Barang } from "../interfaces/Barang";
 
 interface ItemBoxProps {
-  fotoBarang: string;
-  namaBarang: string;
-  hargaBarang: number;
-  originalHargaBarang?: number;
-  diskonProduk?: number;
-  stokBarang?: number;
-  lokasiToko?: string;
-  sold?: number;
-  storeName?: string;
+  idBarang: string;
   onClick?: () => void;
 }
 
@@ -21,18 +14,42 @@ const convertTotalSold = (totalSold: number) => {
   return remainder > 50 ? `${hundreds + 50}+` : `${hundreds}+`;
 };
 
-const ItemBox: React.FC<ItemBoxProps> = ({
-  fotoBarang,
-  namaBarang,
-  hargaBarang,
-  originalHargaBarang,
-  diskonProduk,
-  stokBarang,
-  lokasiToko,
-  sold,
-  storeName,
-  onClick,
-}) => {
+const ItemBox: React.FC<ItemBoxProps> = ({ idBarang, onClick }) => {
+  const [barang, setBarang] = useState<Barang>();
+
+  const hargaDiskon = (hargaAwal: number) => {
+    if (barang?.diskonProduk) {
+      return hargaAwal - (hargaAwal * barang.diskonProduk) / 100;
+    }
+    return hargaAwal;
+  };
+
+  const fetchToko = async (idBarang: string) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/barang/${idBarang}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch toko");
+
+      const data = await response.json();
+
+      setBarang(data);
+    } catch (error) {
+      console.error("Error fetching toko:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchToko(idBarang);
+  }, []);
+
   return (
     <Box
       sx={{
@@ -54,24 +71,24 @@ const ItemBox: React.FC<ItemBoxProps> = ({
       <Box sx={{ position: "relative", width: "100%", height: 180 }}>
         <Box
           component="img"
-          src={fotoBarang}
-          alt={namaBarang}
+          src={barang?.fotoBarang}
+          alt={barang?.namaBarang}
           sx={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
             backgroundColor: "#f5f5f5",
-            filter: stokBarang === 0 ? "brightness(50%)" : "none",
+            filter: barang?.stokBarang === 0 ? "brightness(50%)" : "none",
           }}
         />
-        {stokBarang !== undefined && (
+        {barang?.stokBarang !== undefined && (
           <Box
             sx={{
               position: "absolute",
               top: 8,
               left: 8,
-              bgcolor: stokBarang === 0 ? "#d32f2f" : "#fff",
-              color: stokBarang === 0 ? "#fff" : "#d32f2f",
+              bgcolor: barang?.stokBarang === 0 ? "#d32f2f" : "#fff",
+              color: barang?.stokBarang === 0 ? "#fff" : "#d32f2f",
               fontWeight: 700,
               fontSize: "0.75rem",
               px: 1,
@@ -80,10 +97,12 @@ const ItemBox: React.FC<ItemBoxProps> = ({
               boxShadow: 1,
             }}
           >
-            {stokBarang === 0 ? "Stok Habis" : `${stokBarang} tersisa`}
+            {barang?.stokBarang === 0
+              ? "Stok Habis"
+              : `${barang?.stokBarang} tersisa`}
           </Box>
         )}
-        {diskonProduk && (
+        {barang?.diskonProduk && (
           <Box
             sx={{
               position: "absolute",
@@ -99,7 +118,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
               boxShadow: 1,
             }}
           >
-            {diskonProduk}%
+            {barang?.diskonProduk}%
           </Box>
         )}
       </Box>
@@ -111,12 +130,12 @@ const ItemBox: React.FC<ItemBoxProps> = ({
           variant="subNamaItem2"
           noWrap
           sx={{ fontWeight: 600, color: "#222", mb: 0.5 }}
-          namaBarang={namaBarang}
+          namaBarang={barang?.namaBarang}
         >
-          {namaBarang}
+          {barang?.namaBarang}
         </Typography>
 
-        {originalHargaBarang && diskonProduk ? (
+        {barang?.hargaBarang && barang?.diskonProduk ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
             <Typography
               variant="body1"
@@ -126,7 +145,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
                 fontSize: "1rem",
               }}
             >
-              {hargaBarang
+              {hargaDiskon(barang.hargaBarang)
                 .toLocaleString("id-ID", {
                   style: "currency",
                   currency: "IDR",
@@ -141,7 +160,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
                 fontSize: "0.75rem",
               }}
             >
-              {originalHargaBarang
+              {barang?.hargaBarang
                 .toLocaleString("id-ID", {
                   style: "currency",
                   currency: "IDR",
@@ -159,7 +178,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
               fontSize: "1rem",
             }}
           >
-            {hargaBarang
+            {barang?.hargaBarang
               .toLocaleString("id-ID", {
                 style: "currency",
                 currency: "IDR",
@@ -169,8 +188,10 @@ const ItemBox: React.FC<ItemBoxProps> = ({
         )}
 
         <Box sx={{ fontSize: "0.75rem", color: "#666", mb: 1 }}>
-          {lokasiToko && <div>{lokasiToko}</div>}
-          {sold && <div>{convertTotalSold(sold)} terjual</div>}
+          {barang?.toko.lokasiToko && <div>{barang?.toko.lokasiToko}</div>}
+          {barang?.jumlahTerjual && (
+            <div>{convertTotalSold(barang?.jumlahTerjual)} terjual</div>
+          )}
         </Box>
 
         <Typography
@@ -181,7 +202,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
             mt: "auto",
           }}
         >
-          {storeName}
+          {barang?.toko.namaToko}
         </Typography>
       </Box>
     </Box>

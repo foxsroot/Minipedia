@@ -6,9 +6,14 @@ import userRoutes from "./routes/userRoutes";
 import barangRoutes from "./routes/barangRoutes";
 import orderRoutes from "./routes/orderRoutes";
 import tokoRouter from "./routes/tokoRoutes";
+import cors from "cors";
 
 const app = express();
 
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    credentials: true,
+}));
 app.use(json());
 
 // Routes start

@@ -1,9 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { Barang } from '../models/Barang';
-import { Toko } from '../models/Toko';
+import { Barang, Toko, OrderItem } from '../models/index';
 import { ApiError } from '../utils/ApiError';
-import { Order } from '../models/Order';
-import { OrderItem } from '../models/OrderItem';
 
 export const getBarangById = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -21,21 +18,27 @@ export const getBarangById = async (req: Request, res: Response, next: NextFunct
 
 export const getAllBarangs = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const barangs = await Barang.findAll({
-            include: [
-                {
-                    model: Toko,
-                    as: 'toko',
-                    attributes: ['namaToko', 'lokasiToko']
-                }
-            ]
-        });
+        // const barangs = await Barang.findAll({
+        //     include: [
+        //         {
+        //             model: Toko,
+        //             as: 'toko',
+        //             attributes: ['namaToko', 'lokasiToko']
+        //         }
+        //     ]
+        // });
+
+        const barangs = await Barang.findAll();
+
+        console.log(barangs);
 
         const barangIds = barangs.map(b => b.barangId);
 
         const orderItems = await OrderItem.findAll({
             where: { barangId: barangIds }
         });
+
+        console.log(orderItems);
 
         const jumlahTerjualMap: { [key: string]: number } = {};
 
@@ -44,10 +47,14 @@ export const getAllBarangs = async (req: Request, res: Response, next: NextFunct
             jumlahTerjualMap[id] = (jumlahTerjualMap[id] || 0) + item.quantity;
         });
 
+        console.log(barangs);
+
         const result = barangs.map(barang => ({
             ...barang.toJSON(),
             jumlahTerjual: jumlahTerjualMap[barang.barangId] || 0
         }));
+
+        console.log(result);
 
         res.status(200).json(result);
     } catch (err) {

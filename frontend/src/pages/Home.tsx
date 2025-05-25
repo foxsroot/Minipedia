@@ -82,10 +82,11 @@ const Home = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch barang data");
+        console.log("Failed to fetch barang data:", response.statusText);
       }
 
       const data = await response.json();
+      console.log(data);
       setBarangs(data);
     } catch (error) {
       console.error("Error fetching barang data:", error);
