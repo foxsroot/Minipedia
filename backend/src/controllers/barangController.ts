@@ -113,6 +113,11 @@ export const updateBarang = async (req: Request, res: Response, next: NextFuncti
             return next(new ApiError(403, 'Forbidden: You do not have permission to update this barang'));
         }
 
+        // If a new file is uploaded, update fotoBarang
+        if (req.file) {
+            req.body.fotoBarang = `${req.file.filename}`;
+        }
+
         await barang.update(req.body);
         res.status(200).json(barang);
     } catch (err) {

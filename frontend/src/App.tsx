@@ -6,6 +6,7 @@ import Development from "./pages/Development";
 import RegisterToko from "./pages/RegisterToko";
 import UpdateToko from "./pages/UpdateToko";
 import CreateItem from "./pages/RegisterProduct";
+import UpdateProduct from "./pages/UpdateProduct";
 import ManageProduct from "./pages/ManageProduct";
 import SellerHomepage from "./pages/SellerHomepage";
 import ManageOrder from "./pages/ManageOrder";
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="/register-toko" element={<RegisterToko />} />
         <Route path="/update-toko" element={<UpdateToko />} />
         <Route path="/add-product" element={<CreateItem />} />
+        <Route path="/edit-product/:id" element={<UpdateProduct />} />
         <Route path="/seller-homepage" element={<SellerHomepage />} />
         <Route path="/manage-product" element={<ManageProduct />} />
         <Route path="/manage-order" element={<ManageOrder />} />

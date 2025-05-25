@@ -7,7 +7,7 @@ const barangRouter = express.Router();
 barangRouter.get('/:id', authenticateToken, getBarangById);
 barangRouter.get('/', authenticateToken, getAllBarangs);
 barangRouter.post('/', authenticateToken, uploadSingleImage, createBarang);
-barangRouter.put('/:id', authenticateToken, updateBarang);
+barangRouter.put('/:id', authenticateToken, uploadSingleImage, updateBarang);
 barangRouter.delete('/:id', authenticateToken, deleteBarang);
 
 export default barangRouter;
