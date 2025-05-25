@@ -119,8 +119,25 @@ const handleSubmit = async (e: React.FormEvent) => {
     <div style={{ display: "flex" }}>
       <SellerSidebar />
       <main style={{ flex: 1, padding: "2rem" }}>
-        <h2 style={{ fontWeight: 700, fontSize: "1.5rem", marginBottom: 24 }}>
+        <h2 style={{ fontWeight: 700, fontSize: "1.5rem", marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           Products Management
+          <Button
+            variant="contained"
+            sx={{
+              ml: 2,
+              background: 'linear-gradient(90deg, #03ac0e 0%, #1abc9c 100%)',
+              fontWeight: 'bold',
+              color: 'white',
+              borderRadius: 2,
+              textTransform: 'none',
+              '&:hover': {
+                background: 'linear-gradient(90deg, #02940c 0%, #16a085 100%)'
+              }
+            }}
+            onClick={() => navigate('/manage-product')}
+          >
+            Back
+          </Button>
         </h2>
 
         <Container maxWidth="sm">
