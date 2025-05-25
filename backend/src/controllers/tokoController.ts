@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Barang, Toko } from '../models/index';
+import { Barang, Toko, Order, OrderItem } from '../models/index';
 import { ApiError } from '../utils/ApiError';
 import { Op } from 'sequelize';
 
@@ -157,7 +157,15 @@ export const getCurrentUserToko = async (req: Request, res: Response, next: Next
                 {
                     model: Barang,
                     as: 'barang',
-                    attributes: ['barangId', 'namaBarang', 'hargaBarang', 'stokBarang', 'deskripsiBarang', 'kategoriProduk', 'diskonProduk'],
+                    attributes: [
+                        'barangId',
+                        'namaBarang',
+                        'hargaBarang',
+                        'stokBarang',
+                        'deskripsiBarang',
+                        'kategoriProduk',
+                        'diskonProduk'
+                    ],
                 },
             ],
         });
@@ -165,6 +173,23 @@ export const getCurrentUserToko = async (req: Request, res: Response, next: Next
         if (!toko) {
             return next(new ApiError(404, 'Toko not found for the current user'));
         }
+
+        // Find all orders that have at least one orderItem with barang from this toko
+        const orders = await Order.findAll({
+            include: [
+                {
+                    model: OrderItem,
+                    as: 'orderItems',
+                    include: [
+                        {
+                            model: Barang,
+                            where: { tokoId: toko.tokoId },
+                            attributes: ['barangId', 'namaBarang', 'tokoId'],
+                        }
+                    ]
+                }
+            ]
+        });
 
         // Format the response
         const formattedToko = {
@@ -179,6 +204,20 @@ export const getCurrentUserToko = async (req: Request, res: Response, next: Next
                 deskripsiBarang: b.deskripsiBarang,
                 kategoriProduk: b.kategoriProduk,
                 diskonProduk: parseFloat(b.diskonProduk),
+            })),
+            orders: orders.map((order: any) => ({
+                orderId: order.orderId,
+                namaPenerima: order.namaPenerima,
+                alamatPengiriman: order.alamatPengiriman,
+                statusPengiriman: order.statusPengiriman,
+                nomorResi: order.nomorResi,
+                waktuTransaksi: order.waktuTransaksi,
+                orderItems: order.orderItems.map((item: any) => ({
+                    orderItemId: item.orderItemId,
+                    barangId: item.barangId,
+                    jumlah: item.jumlah,
+                    barang: item.barang,
+                })),
             })),
         };
 
