@@ -11,20 +11,21 @@ const UpdateToko = () => {
   useEffect(() => {
     const fetchToko = async () => {
       try {
-        const response = await fetch(`/api/toko/owner`, {
+        const response = await fetch(`/api/toko/current/owner`, {
           headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
         if (response.ok) {
           const data = await response.json();
-          const toko = Array.isArray(data) ? data[0] : data;
-          setNamaToko(toko?.namaToko || "");
-          setLokasiToko(toko?.lokasiToko || "");
+          console.log("Toko data fetched:", data);
+          setNamaToko(data.namaToko || "");
+          setLokasiToko(data.lokasiToko || "");
         } else {
           setMessage("Gagal mengambil data toko.");
         }
-      } catch {
+      } catch (error) {
+        console.error("Error fetching toko data:", error);
         setMessage("Terjadi kesalahan saat mengambil data toko.");
       } finally {
         setLoading(false);
@@ -40,17 +41,21 @@ const UpdateToko = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({ namaToko, lokasiToko }),
       });
       if (response.ok) {
         setMessage("Toko berhasil diupdate!");
+        setTimeout(() => {
+          setMessage("");
+        }, 2000);
       } else {
         const data = await response.json();
         setMessage(data.message || "Gagal mengupdate toko.");
       }
-    } catch {
+    } catch (error) {
+      console.error("Error updating toko:", error);
       setMessage("Terjadi kesalahan.");
     }
   };
@@ -60,16 +65,38 @@ const UpdateToko = () => {
       <SellerNavbar />
       <div style={{ display: "flex" }}>
         <SellerSidebar />
-        <main style={{ flex: 1, padding: "2rem 0 2rem 2rem", background: "#f8f9fb", minHeight: "100vh" }}>
-          <h2 style={{ marginBottom: "2rem", color: "black", textAlign: "left" }}>
+        <main
+          style={{
+            flex: 1,
+            padding: "2rem 0 2rem 2rem",
+            background: "#f8f9fb",
+            minHeight: "100vh",
+          }}
+        >
+          <h2
+            style={{
+              marginBottom: "2rem",
+              color: "black",
+              textAlign: "left",
+            }}
+          >
             Update Toko Anda
           </h2>
           {loading ? (
-            <div style={{ textAlign: "center", padding: "2rem" }}>Loading...</div>
+            <div style={{ textAlign: "center", padding: "2rem" }}>
+              Loading...
+            </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ maxWidth: 800 }}>
               <div style={{ marginBottom: "1.5rem" }}>
-                <label htmlFor="namaToko" style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>
+                <label
+                  htmlFor="namaToko"
+                  style={{
+                    display: "block",
+                    marginBottom: 6,
+                    fontWeight: 500,
+                  }}
+                >
                   Nama Toko
                 </label>
                 <input
@@ -88,7 +115,14 @@ const UpdateToko = () => {
                 />
               </div>
               <div style={{ marginBottom: "1.5rem" }}>
-                <label htmlFor="lokasiToko" style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>
+                <label
+                  htmlFor="lokasiToko"
+                  style={{
+                    display: "block",
+                    marginBottom: 6,
+                    fontWeight: 500,
+                  }}
+                >
                   Lokasi Toko
                 </label>
                 <input
@@ -123,7 +157,17 @@ const UpdateToko = () => {
                   Update Toko
                 </button>
                 {message && (
-                  <div style={{ marginLeft: 16, color: "#d32f2f", alignSelf: "center" }}>{message}</div>
+                  <div
+                    style={{
+                      marginLeft: 16,
+                      color: message.includes("berhasil")
+                        ? "#388e3c"
+                        : "#d32f2f",
+                      alignSelf: "center",
+                    }}
+                  >
+                    {message}
+                  </div>
                 )}
               </div>
             </form>

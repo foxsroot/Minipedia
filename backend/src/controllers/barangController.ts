@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { Barang } from '../models/Barang';
 import { Toko } from '../models/Toko';
 import { ApiError } from '../utils/ApiError';
+import { Order } from '../models/Order';
+import { OrderItem } from '../models/OrderItem';
 
 export const getBarangById = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -19,15 +21,35 @@ export const getBarangById = async (req: Request, res: Response, next: NextFunct
 
 export const getAllBarangs = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const barang = await Barang.findAll({
-            include: {
-                model: Toko,
-                as: 'toko',
-                attributes: ['namaToko', 'lokasiToko']
-            }
+        const barangs = await Barang.findAll({
+            include: [
+                {
+                    model: Toko,
+                    as: 'toko',
+                    attributes: ['namaToko', 'lokasiToko']
+                }
+            ]
         });
 
-        res.status(200).json(barang);
+        const barangIds = barangs.map(b => b.barangId);
+
+        const orderItems = await OrderItem.findAll({
+            where: { barangId: barangIds }
+        });
+
+        const jumlahTerjualMap: { [key: string]: number } = {};
+
+        orderItems.forEach(item => {
+            const id = item.barangId;
+            jumlahTerjualMap[id] = (jumlahTerjualMap[id] || 0) + item.quantity;
+        });
+
+        const result = barangs.map(barang => ({
+            ...barang.toJSON(),
+            jumlahTerjual: jumlahTerjualMap[barang.barangId] || 0
+        }));
+
+        res.status(200).json(result);
     } catch (err) {
         return next(new ApiError(500, 'Failed to retrieve barang'));
     }

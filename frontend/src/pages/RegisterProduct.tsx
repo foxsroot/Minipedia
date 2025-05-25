@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Container, TextField, Typography, Button, Grid, Paper, Box, Snackbar, Alert
+  TextField, Typography, Button, Grid, Paper, Box, Snackbar, Alert
 } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
 import SellerNavbar from '../components/SellerNavbar';
+import SellerSidebar from '../components/SellerSidebar';
+
+import NavigationBar from '../components/NavigationBar';
 import SellerSidebar from '../components/SellerSidebar';
 
 const CreateItem: React.FC = () => {
@@ -47,6 +50,7 @@ const CreateItem: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -58,6 +62,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   setError(null);
   setSuccess(null);
 
+<<<<<<< HEAD
   const token = localStorage.getItem("token");
   if (!token) {
     navigate("/login");
@@ -129,6 +134,89 @@ const handleSubmit = async (e: React.FormEvent) => {
               Tambahkan Produk
             </Typography>
 
+=======
+    try {
+      const payload = {
+        ...formData,
+        stokBarang: Number(formData.stokBarang),
+        hargaBarang: Number(formData.hargaBarang),
+      };
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      const response = await fetch("/api/barang", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.status === 401) {
+        navigate("/auth/login");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Gagal menambahkan barang.");
+      }else{
+        setSnackbar({ open: true, success: true, message: 'Barang berhasil ditambahkan!' });
+        setFormData({
+        namaBarang: '',
+        deskripsiBarang: '',
+        stokBarang: '',
+        hargaBarang: '',
+        kategoriProduk: '',
+        });
+         
+        setTimeout(() => {
+          navigate("/manage-product");
+        }, 1000); 
+      }
+
+    } catch (error: any) {
+      setSnackbar({ open: true, success: false, message: error.message || 'Terjadi kesalahan.' });
+    }
+  };
+
+  return (
+    <div>
+      <NavigationBar />
+      <div style={{ display: 'flex' }}>
+        <SellerSidebar />
+        <main style={{ flex: 1, padding: '2rem' }}>
+          <Grid container alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+            <Grid item>
+              <Typography variant="h5" fontWeight="bold" sx={{ color: '#03ac0e' }}>
+                Tambahkan Produk
+              </Typography>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="outlined"
+                onClick={() => navigate('/manage-product')}
+                sx={{
+                  borderColor: '#03ac0e',
+                  color: '#03ac0e',
+                  fontWeight: 'bold',
+                  '&:hover': {
+                    backgroundColor: '#e8f5e9',
+                    borderColor: '#02940c',
+                  }
+                }}
+              >
+                Kembali
+              </Button>
+            </Grid>
+          </Grid>
+
+          <Paper elevation={4} sx={{ p: 4, mt: 4, borderRadius: 4, bgcolor: '#fdfdfd' }}>
+>>>>>>> e01888df6a04e49000e25d164bee6c72ea4635f5
             <Box component="form" onSubmit={handleSubmit} noValidate>
               <Grid container spacing={2} direction="column">
                 <Grid item xs={12}>
@@ -141,7 +229,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                     required
                   />
                 </Grid>
+<<<<<<< HEAD
 
+=======
+>>>>>>> e01888df6a04e49000e25d164bee6c72ea4635f5
                 <Grid item xs={12}>
                   <TextField
                     name="deskripsiBarang"
@@ -155,6 +246,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   />
                 </Grid>
 
+<<<<<<< HEAD
                 <Grid container item xs={12} spacing={2}>
                   <Grid item xs={4}>
                     <TextField
@@ -162,6 +254,16 @@ const handleSubmit = async (e: React.FormEvent) => {
                       label="Stok Barang"
                       fullWidth
                       type="number"
+=======
+                {/* Grouped row for stok, harga, and kategori */}
+                <Grid item container spacing={2} xs={12}>
+                  <Grid item xs={4}>
+                    <TextField
+                      name="stokBarang"
+                      label="Stok"
+                      type="number"
+                      fullWidth
+>>>>>>> e01888df6a04e49000e25d164bee6c72ea4635f5
                       value={formData.stokBarang}
                       onChange={handleChange}
                       required
@@ -170,9 +272,15 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <Grid item xs={4}>
                     <TextField
                       name="hargaBarang"
+<<<<<<< HEAD
                       label="Harga Barang"
                       fullWidth
                       type="number"
+=======
+                      label="Harga"
+                      type="number"
+                      fullWidth
+>>>>>>> e01888df6a04e49000e25d164bee6c72ea4635f5
                       value={formData.hargaBarang}
                       onChange={handleChange}
                       required
@@ -180,13 +288,17 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </Grid>
                   <Grid item xs={4}>
                     <TextField
+<<<<<<< HEAD
                       select
+=======
+>>>>>>> e01888df6a04e49000e25d164bee6c72ea4635f5
                       name="kategoriProduk"
                       label="Kategori"
                       fullWidth
                       value={formData.kategoriProduk}
                       onChange={handleChange}
                       required
+<<<<<<< HEAD
                     >
                       {kategoriOptions.map(option => (
                         <MenuItem key={option.value} value={option.value}>
@@ -222,6 +334,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                       {formData.foto_barang}
                     </Typography>
                   )}
+=======
+                    />
+                  </Grid>
+>>>>>>> e01888df6a04e49000e25d164bee6c72ea4635f5
                 </Grid>
 
                 <Grid item xs={12}>
@@ -230,7 +346,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                     fullWidth
                     variant="contained"
                     sx={{
+<<<<<<< HEAD
                       mt: 3,
+=======
+>>>>>>> e01888df6a04e49000e25d164bee6c72ea4635f5
                       background: 'linear-gradient(90deg, #03ac0e 0%, #1abc9c 100%)',
                       fontWeight: 'bold',
                       color: 'white',
@@ -239,7 +358,11 @@ const handleSubmit = async (e: React.FormEvent) => {
                       }
                     }}
                   >
+<<<<<<< HEAD
                     Simpan Barang
+=======
+                    Simpan
+>>>>>>> e01888df6a04e49000e25d164bee6c72ea4635f5
                   </Button>
                 </Grid>
               </Grid>
@@ -255,11 +378,19 @@ const handleSubmit = async (e: React.FormEvent) => {
               {snackbar.message}
             </Alert>
           </Snackbar>
+<<<<<<< HEAD
         </Container>
       </main>
     </div>
   </div>
 );
+=======
+        </main>
+      </div>
+    </div>
+  );
+
+>>>>>>> e01888df6a04e49000e25d164bee6c72ea4635f5
 };
 
 export default CreateItem;
