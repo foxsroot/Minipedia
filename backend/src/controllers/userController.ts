@@ -96,7 +96,7 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
                 {
                     model: Toko,
                     as: 'toko',
-                    attributes: ["namaToko"]
+                    attributes: ["namaToko","lokasiToko", "tokoId"]
                 }
             ]
         });
@@ -112,7 +112,11 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
             email: decryptedUser.email,
             nomorTelpon: decryptedUser.nomorTelpon,
             username: decryptedUser.username,
-            Toko,
+            Toko: decryptedUser.toko ? {
+                tokoId: decryptedUser.toko.tokoId,
+                namaToko: decryptedUser.toko.namaToko,
+                lokasiToko: decryptedUser.toko.lokasiToko
+            } : null
         });
     } catch (err) {
         next(new ApiError(500, 'Failed to get current user'));

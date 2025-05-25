@@ -19,10 +19,12 @@ import {
   FaShoppingCart,
 } from "react-icons/fa";
 
+import type { TokoDetail } from "../interfaces/Toko";
+
 type UserType = {
   nama: string;
   userId: string;
-  hasToko: boolean;
+  Toko: TokoDetail | null;
 };
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
@@ -122,6 +124,7 @@ const NavigationBar = () => {
         });
         if (res.ok) {
           const data = await res.json();
+          console.log("User data fetched:", data);
           setUser(data);
         } else {
           setUser(null);
@@ -160,7 +163,7 @@ const NavigationBar = () => {
 
           {!loading && (
             user ? (
-              user.hasToko ? (
+              user.Toko?.tokoId ? (
                 <Button
                   variant="contained"
                   color="success"
@@ -179,14 +182,16 @@ const NavigationBar = () => {
                   Register Toko
                 </Button>
               )
-            ) : <Button
-                  variant="contained"
-                  color="success"
-                  sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
-                  onClick={() => navigate("/seller-homepage")}
-                >
-                  Seller Dashboard
-                </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="success"
+                sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
+                onClick={() => navigate("/register")}
+              >
+                Register
+              </Button>
+            )
           )}
 
           {!user ? (

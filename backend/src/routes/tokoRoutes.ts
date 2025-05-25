@@ -5,7 +5,7 @@ import { authenticateToken } from '../middlewares/authMiddleware';
 const tokoRouter = express.Router();
 
 tokoRouter.get('/:id', authenticateToken, getTokoById);
-tokoRouter.get('/owner', authenticateToken, getCurrentUserToko);
+tokoRouter.get('/current/owner', authenticateToken, getCurrentUserToko);
 tokoRouter.get('/', authenticateToken, getAllTokos);
 tokoRouter.post('/', authenticateToken, createToko);
 tokoRouter.put('/', authenticateToken, updateToko);

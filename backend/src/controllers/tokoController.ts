@@ -147,23 +147,42 @@ export const getCurrentUserToko = async (req: Request, res: Response, next: Next
         return next(new ApiError(401, 'Unauthorized: User not authenticated'));
     }
 
-    const tokoId = req.user.tokoId;
-
-    if (!tokoId) {
-        return next(new ApiError(400, 'User doesn\'t have a toko'));
-    }
+    const userId = req.user.userId;
 
     try {
-        const toko = await Toko.findByPk(tokoId, {
+        // Find the toko associated with the authenticated user
+        const toko = await Toko.findOne({
+            where: { userId },
             include: [
                 {
                     model: Barang,
                     as: 'barang',
-                }
-            ]
+                    attributes: ['barangId', 'namaBarang', 'hargaBarang', 'stokBarang', 'deskripsiBarang', 'kategoriProduk', 'diskonProduk'],
+                },
+            ],
         });
 
-        res.json(JSON.stringify(toko));
+        if (!toko) {
+            return next(new ApiError(404, 'Toko not found for the current user'));
+        }
+
+        // Format the response
+        const formattedToko = {
+            tokoId: toko.tokoId,
+            namaToko: toko.namaToko,
+            lokasiToko: toko.lokasiToko,
+            barang: toko.barang.map((b: any) => ({
+                barangId: b.barangId,
+                namaBarang: b.namaBarang,
+                hargaBarang: Number(b.hargaBarang),
+                stokBarang: Number(b.stokBarang),
+                deskripsiBarang: b.deskripsiBarang,
+                kategoriProduk: b.kategoriProduk,
+                diskonProduk: parseFloat(b.diskonProduk),
+            })),
+        };
+
+        res.status(200).json(formattedToko);
     } catch (err) {
         next(new ApiError(500, 'Failed to get current user toko'));
     }
