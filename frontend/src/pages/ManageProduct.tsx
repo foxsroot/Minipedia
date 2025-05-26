@@ -22,19 +22,19 @@ const ManageProduct = () => {
   useEffect(() => {
     const fetchBarang = async () => {
       try {
-        const res = await fetch("/api/toko/owner", {
+        const res = await fetch("/api/toko/current/owner", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
         if (res.ok) {
           const tokoData = await res.json();
-          const toko = Array.isArray(tokoData) ? tokoData[0] : tokoData;
-          setBarang(toko?.barang || []);
+          setBarang(tokoData.barang || []); // Set the barang list from the toko data
         } else {
           setBarang([]);
         }
-      } catch {
+      } catch (error) {
+        console.error("Error fetching barang:", error);
         setBarang([]);
       } finally {
         setLoading(false);
@@ -49,7 +49,15 @@ const ManageProduct = () => {
       <div style={{ display: "flex" }}>
         <SellerSidebar />
         <main style={{ flex: 1, padding: "2rem" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, marginTop: 20 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 24,
+              marginTop: 20,
+            }}
+          >
             <h2 style={{ fontWeight: 700, fontSize: "1.5rem", margin: 0 }}>
               Products Management
             </h2>
@@ -88,22 +96,55 @@ const ManageProduct = () => {
                   >
                     No
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, borderRight: "1px solid #e0e0e0", width: "19%" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: 600,
+                      borderRight: "1px solid #e0e0e0",
+                      width: "19%",
+                    }}
+                  >
                     Nama Barang
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, borderRight: "1px solid #e0e0e0", width: "26%" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: 600,
+                      borderRight: "1px solid #e0e0e0",
+                      width: "26%",
+                    }}
+                  >
                     Deskripsi
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, borderRight: "1px solid #e0e0e0", width: "7%" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: 600,
+                      borderRight: "1px solid #e0e0e0",
+                      width: "7%",
+                    }}
+                  >
                     Stok
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, borderRight: "1px solid #e0e0e0", width: "15%" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: 600,
+                      borderRight: "1px solid #e0e0e0",
+                      width: "15%",
+                    }}
+                  >
                     Harga
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, borderRight: "1px solid #e0e0e0", width: "15%" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: 600,
+                      borderRight: "1px solid #e0e0e0",
+                      width: "15%",
+                    }}
+                  >
                     Kategori
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, width: "15%" }} align="left">
+                  <TableCell
+                    sx={{ fontWeight: 600, width: "15%" }}
+                    align="left"
+                  >
                     Action
                   </TableCell>
                 </TableRow>
@@ -124,20 +165,33 @@ const ManageProduct = () => {
                         borderBottom: "1px solid #e0e0e0",
                       }}
                     >
-                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>{idx + 1}</TableCell>
-                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>{b.namaBarang}</TableCell>
-                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>{b.deskripsiBarang}</TableCell>
-                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>{b.stokBarang}</TableCell>
-                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>{b.hargaBarang}</TableCell>
-                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>{b.kategoriProduk}</TableCell>
+                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>
+                        {idx + 1}
+                      </TableCell>
+                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>
+                        {b.namaBarang}
+                      </TableCell>
+                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>
+                        {b.deskripsiBarang}
+                      </TableCell>
+                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>
+                        {b.stokBarang}
+                      </TableCell>
+                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>
+                        {b.hargaBarang}
+                      </TableCell>
+                      <TableCell sx={{ borderRight: "1px solid #e0e0e0" }}>
+                        {b.kategoriProduk}
+                      </TableCell>
                       <TableCell align="left">
                         <Button
                           variant="contained"
                           color="primary"
                           size="small"
                           style={{ textTransform: "none" }}
+                          onClick={() => navigate(`/edit-product/${b.barangId}`)}
                         >
-                          Manage Barang
+                          Edit
                         </Button>
                       </TableCell>
                     </TableRow>

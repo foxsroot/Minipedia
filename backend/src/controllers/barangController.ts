@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Barang } from '../models/Barang';
-import { Toko } from '../models/Toko';
+import { Barang, Toko, OrderItem } from '../models/index';
 import { ApiError } from '../utils/ApiError';
 
 export const getBarangById = async (req: Request, res: Response, next: NextFunction) => {
@@ -19,15 +18,35 @@ export const getBarangById = async (req: Request, res: Response, next: NextFunct
 
 export const getAllBarangs = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const barang = await Barang.findAll({
-            include: {
-                model: Toko,
-                as: 'toko',
-                attributes: ['namaToko', 'lokasiToko']
-            }
+        const barangs = await Barang.findAll({
+            include: [
+                {
+                    model: Toko,
+                    as: 'toko',
+                    attributes: ['namaToko', 'lokasiToko']
+                }
+            ]
         });
 
-        res.status(200).json(barang);
+        const barangIds = barangs.map(b => b.barangId);
+
+        const orderItems = await OrderItem.findAll({
+            where: { barangId: barangIds }
+        });
+
+        const jumlahTerjualMap: { [key: string]: number } = {};
+
+        orderItems.forEach(item => {
+            const id = item.barangId;
+            jumlahTerjualMap[id] = (jumlahTerjualMap[id] || 0) + item.quantity;
+        });
+
+        const result = barangs.map(barang => ({
+            ...barang.toJSON(),
+            jumlahTerjual: jumlahTerjualMap[barang.barangId] || 0
+        }));
+
+        res.status(200).json(result);
     } catch (err) {
         return next(new ApiError(500, 'Failed to retrieve barang'));
     }
@@ -41,6 +60,29 @@ export const createBarang = async (req: Request, res: Response, next: NextFuncti
     const tokoId = req.user.tokoId;
 
     try {
+        const hargaBarangNumber = parseFloat(req.body.hargaBarang);
+
+        if (isNaN(hargaBarangNumber) || hargaBarangNumber < 0) {
+            return next(new ApiError(400, 'Invalid hargaBarang format'));
+        }
+    } catch (err) {
+        return next(new ApiError(400, 'Invalid hargaBarang format'));
+    }
+
+    if (req.body.hargaBarang <= 0) {
+        return next(new ApiError(400, 'User doesn\'t have a toko'));
+    }
+
+    try {
+        // If file is uploaded, set fotoBarang to the uploaded file's filename
+        if (req.file) {
+            req.body.fotoBarang = `${req.file.filename}`;
+        } else {
+            return next(new ApiError(400, 'Foto barang harus diupload'));
+        }
+        console.log("barang : ", req.body);
+        console.log("file : ", req.file);
+
         const barang = await Barang.create(
             {
                 namaBarang: req.body.namaBarang,
@@ -57,6 +99,7 @@ export const createBarang = async (req: Request, res: Response, next: NextFuncti
             barangId: barang.barangId
         });
     } catch (err) {
+        console.error(err);
         return next(new ApiError(500, 'Failed to create barang'));
     }
 };
@@ -82,6 +125,11 @@ export const updateBarang = async (req: Request, res: Response, next: NextFuncti
 
         if (barang.tokoId !== tokoId) {
             return next(new ApiError(403, 'Forbidden: You do not have permission to update this barang'));
+        }
+
+        // If a new file is uploaded, update fotoBarang
+        if (req.file) {
+            req.body.fotoBarang = `${req.file.filename}`;
         }
 
         await barang.update(req.body);

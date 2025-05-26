@@ -1,17 +1,16 @@
-import React from "react";
 import { Box, Typography } from "@mui/material";
 
 interface ItemBoxProps {
-  imageUrl: string;
-  title: string;
-  price: number;
-  originalPrice?: number;
-  discount?: number;
-  stockLeft?: number;
-  location?: string;
-  rating?: number;
-  sold?: number;
-  storeName?: string;
+  barangId: string;
+  namaBarang: string;
+  fotoBarang: string;
+  hargaBarang: number;
+  stokBarang: number;
+  diskonProduk: number;
+  jumlahTerjual: number;
+  namaToko: string;
+  lokasiToko: string;
+  deskripsiBarang?: string;
   onClick?: () => void;
 }
 
@@ -23,18 +22,24 @@ const convertTotalSold = (totalSold: number) => {
 };
 
 const ItemBox: React.FC<ItemBoxProps> = ({
-  imageUrl,
-  title,
-  price,
-  originalPrice,
-  discount,
-  stockLeft,
-  location,
-  rating,
-  sold,
-  storeName,
+  barangId,
+  namaBarang,
   onClick,
+  fotoBarang,
+  hargaBarang,
+  stokBarang,
+  diskonProduk,
+  jumlahTerjual,
+  namaToko,
+  lokasiToko,
 }) => {
+  const hargaDiskon = (hargaAwal: number) => {
+    if (diskonProduk) {
+      return hargaAwal - (hargaAwal * diskonProduk) / 100;
+    }
+    return hargaAwal;
+  };
+
   return (
     <Box
       sx={{
@@ -50,30 +55,31 @@ const ItemBox: React.FC<ItemBoxProps> = ({
         },
         display: "flex",
         flexDirection: "column",
+        key: barangId,
       }}
       onClick={onClick}
     >
       <Box sx={{ position: "relative", width: "100%", height: 180 }}>
         <Box
           component="img"
-          src={imageUrl}
-          alt={title}
+          src={fotoBarang.startsWith('http') ? fotoBarang : `${import.meta.env.VITE_STATIC_URL}/${fotoBarang}`}
+          alt={namaBarang}
           sx={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
             backgroundColor: "#f5f5f5",
-            filter: stockLeft === 0 ? "brightness(50%)" : "none",
+            filter: stokBarang === 0 ? "brightness(50%)" : "none",
           }}
         />
-        {stockLeft !== undefined && (
+        {stokBarang !== 0 && (
           <Box
             sx={{
               position: "absolute",
               top: 8,
               left: 8,
-              bgcolor: stockLeft === 0 ? "#d32f2f" : "#fff",
-              color: stockLeft === 0 ? "#fff" : "#d32f2f",
+              bgcolor: stokBarang === 0 ? "#d32f2f" : "#fff",
+              color: stokBarang === 0 ? "#fff" : "#d32f2f",
               fontWeight: 700,
               fontSize: "0.75rem",
               px: 1,
@@ -82,10 +88,10 @@ const ItemBox: React.FC<ItemBoxProps> = ({
               boxShadow: 1,
             }}
           >
-            {stockLeft === 0 ? "Stok Habis" : `${stockLeft} tersisa`}
+            {stokBarang === 0 ? "Stok Habis" : `${stokBarang} tersisa`}
           </Box>
         )}
-        {discount && (
+        {diskonProduk != 0 && (
           <Box
             sx={{
               position: "absolute",
@@ -101,7 +107,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
               boxShadow: 1,
             }}
           >
-            {discount}%
+            {diskonProduk}%
           </Box>
         )}
       </Box>
@@ -113,12 +119,11 @@ const ItemBox: React.FC<ItemBoxProps> = ({
           variant="subtitle2"
           noWrap
           sx={{ fontWeight: 600, color: "#222", mb: 0.5 }}
-          title={title}
         >
-          {title}
+          {namaBarang}
         </Typography>
 
-        {originalPrice && discount ? (
+        {hargaBarang && diskonProduk ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
             <Typography
               variant="body1"
@@ -128,7 +133,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
                 fontSize: "1rem",
               }}
             >
-              {price
+              {hargaDiskon(hargaBarang)
                 .toLocaleString("id-ID", {
                   style: "currency",
                   currency: "IDR",
@@ -143,7 +148,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
                 fontSize: "0.75rem",
               }}
             >
-              {originalPrice
+              {hargaBarang
                 .toLocaleString("id-ID", {
                   style: "currency",
                   currency: "IDR",
@@ -161,7 +166,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
               fontSize: "1rem",
             }}
           >
-            {price
+            {hargaBarang
               .toLocaleString("id-ID", {
                 style: "currency",
                 currency: "IDR",
@@ -171,12 +176,11 @@ const ItemBox: React.FC<ItemBoxProps> = ({
         )}
 
         <Box sx={{ fontSize: "0.75rem", color: "#666", mb: 1 }}>
-          {location && <div>{location}</div>}
-          {rating && sold && (
-            <div>
-              ⭐ {rating} | {convertTotalSold(sold)} terjual
-            </div>
+          {lokasiToko && <div>{lokasiToko}</div>}
+          {jumlahTerjual != 0 && (
+            <div>{convertTotalSold(jumlahTerjual)} terjual</div>
           )}
+          {!jumlahTerjual && <div>Belum Terjual🤣</div>}
         </Box>
 
         <Typography
@@ -187,7 +191,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
             mt: "auto",
           }}
         >
-          {storeName}
+          {namaToko}
         </Typography>
       </Box>
     </Box>

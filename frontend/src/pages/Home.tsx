@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Grid,
@@ -15,48 +15,8 @@ import {
 } from "@mui/material";
 import NavigationBar from "../components/NavigationBar";
 import ItemBox from "../components/ItemBox";
-
-const items = [
-  {
-    imageUrl:
-      "https://images.tokopedia.net/img/cache/900/VqbcmM/2024/2/23/7a687776-af5d-49a8-bb11-469f0b378a9e.jpg",
-    title: "Neo Ergolift Standing Desk 140cm",
-    category: "Meja",
-    price: 2886000,
-    originalPrice: 3099000,
-    discount: 7,
-    stockLeft: 0,
-    location: "Jakarta Barat",
-    rating: 4.6,
-    sold: 43,
-    storeName: "Toko A",
-  },
-  {
-    imageUrl:
-      "https://images.tokopedia.net/img/cache/900/o3syd0/1997/1/1/22dc69723d4f47a5973df24431e6fc9d~.jpeg",
-    title: "Keyboard Keychron K5 Max",
-    category: "Keyboard",
-    price: 1480000,
-    originalPrice: 1580000,
-    discount: 6,
-    stockLeft: 2,
-    location: "Bandung",
-    rating: 4.8,
-    sold: 175,
-    storeName: "Toko B",
-  },
-  {
-    imageUrl: "https://images.tokopedia.net/img/cache/500-square/product-3.jpg",
-    title: "Monitor ROG 27 Inch 144Hz",
-    category: "Monitor",
-    price: 4000000,
-    stockLeft: 1,
-    location: "Jakarta Selatan",
-    rating: 4.9,
-    sold: 8563,
-    storeName: "Toko C",
-  },
-];
+import type { Barang } from "../interfaces/Barang";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
@@ -66,6 +26,37 @@ const Home = () => {
   const [selectedRating, setSelectedRating] = useState<string>("");
   const [onlyAvailable, setOnlyAvailable] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [barangs, setBarangs] = useState<Barang[]>([]);
+
+  const navigate = useNavigate();
+
+  const fetchBarangs = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/barang`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.log("Failed to fetch barang data:", response.statusText);
+      }
+
+      const data = await response.json();
+      console.log(data);
+      setBarangs(data);
+    } catch (error) {
+      console.error("Error fetching barang data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBarangs();
+  }, []);
 
   const handleLocationChange = (value: string) => {
     setSelectedLocations((prev) =>
@@ -81,28 +72,18 @@ const Home = () => {
     }
   };
 
-  const filteredItems = items.filter((item) => {
-    const price = item.price;
-    const rating = parseFloat(item.rating || "0");
+  const filteredItems = barangs.filter((barang) => {
+    const price = barang.hargaBarang;
     const inPriceRange = price >= minPrice && price <= maxPrice;
     const matchLocation =
       selectedLocations.length === 0 ||
-      selectedLocations.includes(item.location || "");
-    const matchRating = selectedRating
-      ? rating >= parseFloat(selectedRating)
-      : true;
-    const matchAvailability = onlyAvailable ? item.stockLeft == 0 : true;
+      selectedLocations.includes(barang.toko.lokasiToko || "");
+    const matchAvailability = onlyAvailable ? barang.stokBarang == 0 : true;
     const matchCategory = selectedCategory
-      ? item.category === selectedCategory
+      ? barang.kategoriProduk === selectedCategory
       : true;
 
-    return (
-      inPriceRange &&
-      matchLocation &&
-      matchRating &&
-      matchAvailability &&
-      matchCategory
-    );
+    return inPriceRange && matchLocation && matchAvailability && matchCategory;
   });
 
   return (
@@ -241,7 +222,21 @@ const Home = () => {
           <Grid container spacing={2}>
             {filteredItems.map((item, index) => (
               <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
-                <ItemBox {...item} />
+                <ItemBox
+                  barangId={item.barangId}
+                  namaBarang={item.namaBarang}
+                  fotoBarang={item.fotoBarang}
+                  deskripsiBarang={item.deskripsiBarang}
+                  stokBarang={item.stokBarang}
+                  hargaBarang={item.hargaBarang}
+                  diskonProduk={item.diskonProduk || 0}
+                  jumlahTerjual={item.jumlahTerjual}
+                  namaToko={item.toko.namaToko}
+                  lokasiToko={item.toko.lokasiToko}
+                  onClick={() => {
+                    navigate(`/product/${item.barangId}`);
+                  }}
+                />
               </Grid>
             ))}
           </Grid>

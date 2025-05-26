@@ -13,16 +13,15 @@ import {
   Button,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import {
-  FaSearch,
-  FaRegUserCircle,
-  FaShoppingCart,
-} from "react-icons/fa";
+import { FaSearch, FaRegUserCircle, FaShoppingCart } from "react-icons/fa";
+import { useCartContext } from "../contexts/CartContext";
+
+import type { TokoDetail } from "../interfaces/Toko";
 
 type UserType = {
   nama: string;
   userId: string;
-  hasToko: boolean;
+  Toko: TokoDetail | null;
 };
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
@@ -104,7 +103,13 @@ const UserName = styled("span")(({ theme }) => ({
 const NavigationBar = () => {
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
+  const { cartItems } = useCartContext();
+  const [cartItemsTotal, setCartItemsTotal] = useState<number>(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setCartItemsTotal(cartItems.length);
+  }, [cartItems]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -122,6 +127,7 @@ const NavigationBar = () => {
         });
         if (res.ok) {
           const data = await res.json();
+          console.log("User data fetched:", data);
           setUser(data);
         } else {
           setUser(null);
@@ -152,19 +158,27 @@ const NavigationBar = () => {
         </SearchBar>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: "1.2rem" }}>
-          <IconButton title="Cart" sx={{ color: "#222" }}>
-            <Badge badgeContent={2} color="error">
+          <IconButton
+            title="Cart"
+            sx={{ color: "#222" }}
+            onClick={() => navigate("/cart")}
+          >
+            <Badge badgeContent={cartItemsTotal} color="error">
               <FaShoppingCart size={20} />
             </Badge>
           </IconButton>
 
-          {!loading && (
-            user ? (
-              user.hasToko ? (
+          {!loading &&
+            (user ? (
+              user.Toko?.tokoId ? (
                 <Button
                   variant="contained"
                   color="success"
-                  sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: 2,
+                  }}
                   onClick={() => navigate("/seller-homepage")}
                 >
                   Seller Dashboard
@@ -173,21 +187,26 @@ const NavigationBar = () => {
                 <Button
                   variant="contained"
                   color="success"
-                  sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: 2,
+                  }}
                   onClick={() => navigate("/register-toko")}
                 >
                   Register Toko
                 </Button>
               )
-            ) : <Button
-                  variant="contained"
-                  color="success"
-                  sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
-                  onClick={() => navigate("/seller-homepage")}
-                >
-                  Seller Dashboard
-                </Button>
-          )}
+            ) : (
+              <Button
+                variant="contained"
+                color="success"
+                sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
+                onClick={() => navigate("/register")}
+              >
+                Register
+              </Button>
+            ))}
 
           {!user ? (
             <Link to="/login" style={{ textDecoration: "none" }}>

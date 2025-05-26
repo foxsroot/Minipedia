@@ -6,34 +6,82 @@ import {
   CardMedia,
   TextField,
   Grid,
-  Rating,
   Divider,
-  Chip,
-  Tabs,
-  Tab,
-  Avatar,
   IconButton,
   Paper,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import ShareIcon from "@mui/icons-material/Share";
 import NavigationBar from "../components/NavigationBar";
+import { useParams } from "react-router-dom";
+import type { Barang } from "../interfaces/Barang";
+import { useCartContext } from "../contexts/CartContext";
 
 const ProductDetail = () => {
+  const { barangId } = useParams<{ barangId: string }>();
+  const [barang, setBarang] = useState<Barang>();
   const [quantity, setQuantity] = useState(1);
-  const [tab, setTab] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [price, setPrice] = useState(1695000);
-  const stock = 8;
+  const [totalPrice, setTotalPrice] = useState<number>();
+  const [showCopied, setShowCopied] = useState(false);
+  const { addToCart, getFromCart } = useCartContext();
+
+  const handleAddToCart = () => {
+    if (barang) {
+      const existingItem = getFromCart(barang.barangId);
+
+      if ((existingItem?.quantity ?? 0) + quantity > barang.stokBarang) {
+        alert(
+          `Jumlah yang dimasukkan melebihi stok yang tersedia (${barang.stokBarang}).`
+        );
+        return;
+      }
+
+      addToCart({
+        barangId: barang.barangId,
+        quantity: quantity,
+      });
+    }
+  };
 
   const handleQuantityChange = (val: number) => {
-    if (val >= 1 && val <= stock) setQuantity(val);
+    if (val >= 1 && val <= (barang?.stokBarang ?? 0)) setQuantity(val);
+  };
+
+  const fetchProductDetails = async (barangId: string) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/barang/${barangId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Failed to fetch product details:", response.statusText);
+        return;
+      }
+
+      const data = await response.json();
+      setBarang(data);
+      setTotalPrice(data.hargaBarang);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    }
   };
 
   useEffect(() => {
-    setTotalPrice(quantity * price);
+    if (barangId) {
+      fetchProductDetails(barangId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (barang?.hargaBarang !== undefined) {
+      setTotalPrice(quantity * barang.hargaBarang);
+    }
   }, [quantity]);
 
   return (
@@ -43,16 +91,18 @@ const ProductDetail = () => {
         <Box sx={{ maxWidth: "100vw", mx: "auto", px: 2 }}>
           <Grid container spacing={4} justifyContent="center">
             {/* Image Column */}
-            <Grid item xs={12} md={4}>
-              <Card elevation={1}>
+            <Grid item xs={12} md={4} sx={{ width: "20em", height: "20em" }}>
+              <Card elevation={1} sx={{ width: "20em", height: "20em" }}>
                 <CardMedia
                   component="img"
-                  image="https://images.tokopedia.net/img/cache/900/VqbcmM/2024/2/23/7a687776-af5d-49a8-bb11-469f0b378a9e.jpg"
+                  image={`${import.meta.env.VITE_STATIC_URL}/${
+                    barang?.fotoBarang
+                  }`}
                   alt="Product Image"
                   sx={{
                     objectFit: "cover",
-                    width: "25rem",
-                    height: "25rem",
+                    width: "100%",
+                    height: "100%",
                     borderRadius: 2,
                   }}
                 />
@@ -60,26 +110,24 @@ const ProductDetail = () => {
             </Grid>
 
             {/* Product Details Column */}
-            <Grid item xs={12} md={5}>
+            <Grid item xs={12} md={5} width={"50vw"}>
               <Paper elevation={1} sx={{ p: 3, borderRadius: 2 }}>
                 <Typography variant="h6" fontWeight="bold">
-                  Keychron V5 Max QMK/VIA Wireless Fully Assembled Knob - Carbon
-                  Black - GJ Red
+                  {barang?.namaBarang || "Unknown Barang"}
                 </Typography>
 
                 <Box
                   sx={{ display: "flex", gap: 1, mt: 1, alignItems: "center" }}
                 >
-                  <Typography variant="body2" color="text.secondary">
-                    Terjual 25
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    •
-                  </Typography>
-                  <Rating size="small" value={5} readOnly />
-                  <Typography variant="body2" color="text.secondary">
-                    (7 rating)
-                  </Typography>
+                  {barang?.jumlahTerjual == 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      Belum Terjual🤣
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      Terjual {barang?.jumlahTerjual}
+                    </Typography>
+                  )}
                 </Box>
 
                 <Typography
@@ -87,7 +135,7 @@ const ProductDetail = () => {
                   fontWeight="bold"
                   sx={{ mt: 2, color: "#00AA5B" }}
                 >
-                  {price
+                  {barang?.hargaBarang
                     .toLocaleString("id-ID", {
                       style: "currency",
                       currency: "IDR",
@@ -102,22 +150,7 @@ const ProductDetail = () => {
                     <span style={{ color: "#00AA5B" }}>Semua Etalase</span>
                   </Typography>
                   <Typography variant="body2" sx={{ mt: 1 }}>
-                    Keychron V5 Max QMK/VIA Wireless Fully Assembled Knob -
-                    Carbon Black
-                    <br />
-                    Width 148.7 mm <br />
-                    Length 391.5 mm <br />
-                    Front Height 21.5 mm (without keycaps)...
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: "#00AA5B",
-                      mt: 1,
-                      fontWeight: 500,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Lihat Selengkapnya
+                    {barang?.deskripsiBarang}
                   </Typography>
                 </Box>
               </Paper>
@@ -156,7 +189,7 @@ const ProductDetail = () => {
                     onChange={(e) =>
                       handleQuantityChange(parseInt(e.target.value))
                     }
-                    inputProps={{ min: 1, max: stock }}
+                    inputProps={{ min: 1, max: barang?.stokBarang }}
                     sx={{ width: 60, mx: 1 }}
                   />
                   <Button
@@ -168,14 +201,14 @@ const ProductDetail = () => {
                 </Box>
 
                 <Typography variant="body2" color="error" sx={{ mt: 1 }}>
-                  Sisa {stock}
+                  Sisa {barang?.stokBarang}
                 </Typography>
 
                 <Divider sx={{ my: 2 }} />
 
                 <Typography variant="body2">Subtotal</Typography>
                 <Typography variant="h6" fontWeight="bold">
-                  {totalPrice
+                  {(totalPrice ?? 0)
                     .toLocaleString("id-ID", {
                       style: "currency",
                       currency: "IDR",
@@ -191,6 +224,7 @@ const ProductDetail = () => {
                     bgcolor: "#00AA5B",
                     ":hover": { bgcolor: "#009a50" },
                   }}
+                  onClick={handleAddToCart}
                 >
                   + Keranjang
                 </Button>
@@ -210,9 +244,35 @@ const ProductDetail = () => {
                     mt: 2,
                   }}
                 >
-                  <IconButton>
+                  <IconButton
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(window.location.href);
+                      setShowCopied(true);
+                      setTimeout(() => setShowCopied(false), 1500);
+                    }}
+                  >
                     <ShareIcon />
                   </IconButton>
+
+                  {showCopied && (
+                    <Box
+                      sx={{
+                        height: "100%",
+                        mt: "7px",
+                        mr: "35%",
+                        bgcolor: "#333",
+                        color: "#fff",
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: 1,
+                        fontSize: 12,
+                        zIndex: 10,
+                        boxShadow: 2,
+                      }}
+                    >
+                      Copied to clipboard
+                    </Box>
+                  )}
                 </Box>
               </Box>
             </Grid>

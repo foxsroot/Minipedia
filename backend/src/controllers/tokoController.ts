@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Barang, Toko } from '../models/index';
+import { Barang, Toko, Order, OrderItem } from '../models/index';
 import { ApiError } from '../utils/ApiError';
 import { Op } from 'sequelize';
 
@@ -147,23 +147,81 @@ export const getCurrentUserToko = async (req: Request, res: Response, next: Next
         return next(new ApiError(401, 'Unauthorized: User not authenticated'));
     }
 
-    const tokoId = req.user.tokoId;
-
-    if (!tokoId) {
-        return next(new ApiError(400, 'User doesn\'t have a toko'));
-    }
+    const userId = req.user.userId;
 
     try {
-        const toko = await Toko.findByPk(tokoId, {
+        // Find the toko associated with the authenticated user
+        const toko = await Toko.findOne({
+            where: { userId },
             include: [
                 {
                     model: Barang,
                     as: 'barang',
+                    attributes: [
+                        'barangId',
+                        'namaBarang',
+                        'hargaBarang',
+                        'stokBarang',
+                        'deskripsiBarang',
+                        'kategoriProduk',
+                        'diskonProduk'
+                    ],
+                },
+            ],
+        });
+
+        if (!toko) {
+            return next(new ApiError(404, 'Toko not found for the current user'));
+        }
+
+        // Find all orders that have at least one orderItem with barang from this toko
+        const orders = await Order.findAll({
+            include: [
+                {
+                    model: OrderItem,
+                    as: 'orderItems',
+                    include: [
+                        {
+                            model: Barang,
+                            where: { tokoId: toko.tokoId },
+                            attributes: ['barangId', 'namaBarang', 'tokoId'],
+                        }
+                    ]
                 }
             ]
         });
 
-        res.json(JSON.stringify(toko));
+        // Format the response
+        const formattedToko = {
+            tokoId: toko.tokoId,
+            namaToko: toko.namaToko,
+            lokasiToko: toko.lokasiToko,
+            barang: toko.barang.map((b: any) => ({
+                barangId: b.barangId,
+                namaBarang: b.namaBarang,
+                hargaBarang: Number(b.hargaBarang),
+                stokBarang: Number(b.stokBarang),
+                deskripsiBarang: b.deskripsiBarang,
+                kategoriProduk: b.kategoriProduk,
+                diskonProduk: parseFloat(b.diskonProduk),
+            })),
+            orders: orders.map((order: any) => ({
+                orderId: order.orderId,
+                namaPenerima: order.namaPenerima,
+                alamatPengiriman: order.alamatPengiriman,
+                statusPengiriman: order.statusPengiriman,
+                nomorResi: order.nomorResi,
+                waktuTransaksi: order.waktuTransaksi,
+                orderItems: order.orderItems.map((item: any) => ({
+                    orderItemId: item.orderItemId,
+                    barangId: item.barangId,
+                    jumlah: item.jumlah,
+                    barang: item.barang,
+                })),
+            })),
+        };
+
+        res.status(200).json(formattedToko);
     } catch (err) {
         next(new ApiError(500, 'Failed to get current user toko'));
     }

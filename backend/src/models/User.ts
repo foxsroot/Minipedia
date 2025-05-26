@@ -63,6 +63,13 @@ export class User extends Model {
     })
     declare updatedAt: Date;
 
+    @Column({
+        type: DataType.DATE,
+        allowNull: true,
+        field: 'deleted_at'
+    })
+    declare deletedAt: Date | null;
+
     @HasOne(() => Toko)
     declare toko?: Toko;
 
