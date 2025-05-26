@@ -13,7 +13,6 @@ const SellerHomepage = () => {
     const fetchOrdersData = async () => {
       try {
         const token = localStorage.getItem("token");
-        // Fetch data from the getCurrentUserToko endpoint
         const res = await fetch("/api/toko/current/owner", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -21,13 +20,10 @@ const SellerHomepage = () => {
         });
         if (res.ok) {
           const data = await res.json();
-          // Data format expected: { tokoId, namaToko, lokasiToko, barang: [...], orders: [...] }
-          const orders = data.orders || [];
-          // Save the full list of barang from toko as fallback for price lookup
+          const orders = (data.orders || []).filter((order: any) => order.statusPengiriman === "DELIVERED");
           const tokoBarang = data.barang || [];
           const aggr = [];
           const today = new Date();
-          // Loop for the last 7 days (oldest first)
           for (let i = 6; i >= 0; i--) {
             const d = new Date(today);
             d.setDate(today.getDate() - i);
@@ -42,10 +38,8 @@ const SellerHomepage = () => {
                 orderDate.getDate() === d.getDate()
               ) {
                 order.orderItems.forEach((item: any) => {
-                  // Default quantity to 1 if item.jumlah doesn't exist
                   const quantity = item.jumlah ? Number(item.jumlah) : 1;
                   sold += quantity;
-                  // Try to get hargaBarang from the order item; if missing, lookup the toko's barang list.
                   const price =
                     item.barang && item.barang.hargaBarang
                       ? Number(item.barang.hargaBarang)

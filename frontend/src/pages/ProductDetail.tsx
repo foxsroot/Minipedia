@@ -229,7 +229,7 @@ const ProductDetail = () => {
                   }}
                   onClick={handleAddToCart}
                 >
-                  + Keranjang
+                  Beli Barang
                 </Button>
 
                 <Box

@@ -63,7 +63,12 @@ const UpdateProduct = () => {
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type } = e.target;
+    if (["stokBarang", "hargaBarang", "diskonProduk"].includes(name)) {
+      const num = Number(value);
+      if (num < 0) return;
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

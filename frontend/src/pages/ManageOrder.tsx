@@ -91,15 +91,17 @@ const ManageOrder = () => {
     }
   };
 
-  // Filtered orders based on statusFilter
-  const filteredOrders = orders.filter((order) => {
-    if (statusFilter === "ALL") return true;
-    if (statusFilter === "PENDING") return order.statusPengiriman === null;
-    if (statusFilter === "PACKED") return order.statusPengiriman === "PACKED";
-    if (statusFilter === "SHIPPED") return order.statusPengiriman === "SHIPPED";
-    if (statusFilter === "DELIVERED") return order.statusPengiriman === "DELIVERED";
-    return true;
-  });
+  // Filtered orders based on statusFilter and remove canceled orders
+  const filteredOrders = orders
+    .filter((order) => order.statusPesanan !== "CANCELED")
+    .filter((order) => {
+      if (statusFilter === "ALL") return true;
+      if (statusFilter === "PENDING") return order.statusPengiriman === null;
+      if (statusFilter === "PACKED") return order.statusPengiriman === "PACKED";
+      if (statusFilter === "SHIPPED") return order.statusPengiriman === "SHIPPED";
+      if (statusFilter === "DELIVERED") return order.statusPengiriman === "DELIVERED";
+      return true;
+    });
 
   return (
     <div>

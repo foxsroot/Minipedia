@@ -225,6 +225,7 @@ export const getCurrentUserToko = async (req: Request, res: Response, next: Next
                 namaPenerima: order.namaPenerima,
                 alamatPengiriman: order.alamatPengiriman,
                 statusPengiriman: order.statusPengiriman,
+                statusPesanan: order.statusPesanan,
                 nomorResi: order.nomorResi,
                 waktuTransaksi: order.waktuTransaksi,
                 orderItems: order.orderItems.map((item: any) => ({
