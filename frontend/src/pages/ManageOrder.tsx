@@ -19,7 +19,7 @@ const ManageOrder = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await fetch("/api/orders", {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/order`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

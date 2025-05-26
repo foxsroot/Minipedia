@@ -37,7 +37,8 @@ const theme = createTheme({
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { cartItems, removeFromCart, editCartItem } = useCartContext();
+  const { cartItems, removeFromCart, editCartItem, setItemSelected } =
+    useCartContext();
   const [items, setItems] = useState<Barang[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
@@ -88,6 +89,10 @@ const Cart = () => {
   };
 
   const toggleItemSelection = (itemId: string) => {
+    const item = cartItems.find((item) => item.barangId === itemId);
+    if (item) {
+      setItemSelected(itemId, !item.selected);
+    }
     setSelectedItems((prev) =>
       prev.includes(itemId)
         ? prev.filter((id) => id !== itemId)
@@ -101,7 +106,7 @@ const Cart = () => {
 
   const calculateSubtotal = () => {
     return cartItems.reduce((acc, cartItem) => {
-      if (selectedItems.includes(cartItem.barangId)) {
+      if (cartItem.selected) {
         const barang = items.find(
           (item) => item.barangId === cartItem.barangId
         );
@@ -112,6 +117,9 @@ const Cart = () => {
       return acc;
     }, 0);
   };
+
+  // Show subtotal only if at least one item is selected
+  const anySelected = cartItems.some((item) => item.selected);
 
   return (
     <ThemeProvider theme={theme}>
@@ -150,7 +158,7 @@ const Cart = () => {
                     }}
                   >
                     <Checkbox
-                      checked={selectedItems.includes(cartItem.barangId)}
+                      checked={cartItem.selected}
                       onChange={() => toggleItemSelection(cartItem.barangId)}
                       sx={{ mr: 2 }}
                     />
@@ -163,7 +171,15 @@ const Cart = () => {
                           objectFit: "contain",
                           mr: 2,
                         }}
-                        image={barang.fotoBarang || "/default-product.png"}
+                        image={
+                          barang.fotoBarang
+                            ? barang.fotoBarang.startsWith("http")
+                              ? barang.fotoBarang
+                              : `${import.meta.env.VITE_STATIC_URL}/${
+                                  barang.fotoBarang
+                                }`
+                            : "/default-product.png"
+                        }
                         alt={barang.namaBarang}
                       />
                       <Box
@@ -242,7 +258,7 @@ const Cart = () => {
         )}
       </Box>
 
-      {selectedItems.length > 0 && (
+      {anySelected && (
         <Box
           sx={{
             position: "fixed",
@@ -268,9 +284,7 @@ const Cart = () => {
             onClick={() =>
               navigate("/checkout", {
                 state: {
-                  selectedItems: cartItems.filter((item) =>
-                    selectedItems.includes(item.barangId)
-                  ),
+                  selectedItems: cartItems.filter((item) => item.selected),
                 },
               })
             }

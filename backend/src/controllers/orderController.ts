@@ -96,6 +96,7 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
             orderId: order.orderId
         });
     } catch (err) {
+        console.error('Error creating order:', err);
         return next(new ApiError(500, err instanceof Error ? err.message : 'Failed to create order'));
     }
 };

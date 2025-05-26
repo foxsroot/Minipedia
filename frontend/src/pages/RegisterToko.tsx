@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import NavigationBar from "../components/NavigationBar";
+import { useNavigate } from "react-router-dom";
 
 const RegisterToko = () => {
   const [namaToko, setNamaToko] = useState("");
@@ -9,14 +10,17 @@ const RegisterToko = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("/api/toko", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`, 
-        },
-        body: JSON.stringify({ namaToko, lokasiToko }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/toko`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ namaToko, lokasiToko }),
+        }
+      );
       if (response.ok) {
         setMessage("Toko berhasil didaftarkan!");
         setNamaToko("");
@@ -59,7 +63,10 @@ const RegisterToko = () => {
             Daftarkan Toko Anda
           </h2>
           <div style={{ marginBottom: "1rem" }}>
-            <label htmlFor="namaToko" style={{ display: "block", marginBottom: 4 }}>
+            <label
+              htmlFor="namaToko"
+              style={{ display: "block", marginBottom: 4 }}
+            >
               Nama Toko
             </label>
             <input
@@ -77,7 +84,10 @@ const RegisterToko = () => {
             />
           </div>
           <div style={{ marginBottom: "1rem" }}>
-            <label htmlFor="lokasiToko" style={{ display: "block", marginBottom: 4 }}>
+            <label
+              htmlFor="lokasiToko"
+              style={{ display: "block", marginBottom: 4 }}
+            >
               Lokasi Toko
             </label>
             <input

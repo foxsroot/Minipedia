@@ -80,6 +80,8 @@ export const createBarang = async (req: Request, res: Response, next: NextFuncti
         } else {
             return next(new ApiError(400, 'Foto barang harus diupload'));
         }
+        console.log("barang : ", req.body);
+        console.log("file : ", req.file);
 
         const barang = await Barang.create(
             {

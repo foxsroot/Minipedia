@@ -2,12 +2,17 @@ import { createContext, useContext, useState, useEffect, useRef } from "react";
 import type { PropsWithChildren } from "react";
 import type { CartItem } from "../interfaces/CartItem";
 
+interface CartItemWithSelected extends CartItem {
+  selected: boolean;
+}
+
 interface CartContextType {
-  cartItems: CartItem[];
-  addToCart: (item: CartItem) => void;
+  cartItems: CartItemWithSelected[];
+  addToCart: (item: CartItem, selected?: boolean) => void;
   removeFromCart: (itemId: string) => void;
-  getFromCart: (itemId: string | number) => CartItem | undefined;
+  getFromCart: (itemId: string | number) => CartItemWithSelected | undefined;
   editCartItem: (itemId: string, quantity: number) => void;
+  setItemSelected: (itemId: string, selected: boolean) => void;
 }
 
 const CartContext = createContext<CartContextType>({
@@ -16,12 +21,13 @@ const CartContext = createContext<CartContextType>({
   removeFromCart: () => {},
   getFromCart: () => undefined,
   editCartItem: () => {},
+  setItemSelected: () => {},
 });
 
 export const useCartContext = () => useContext(CartContext);
 
 export const CartProvider = ({ children }: PropsWithChildren<{}>) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItemWithSelected[]>([]);
 
   useEffect(() => {
     const savedCart = localStorage.getItem("cartItems");
@@ -55,7 +61,7 @@ export const CartProvider = ({ children }: PropsWithChildren<{}>) => {
     return cartItems.find((item) => String(item.barangId) === String(itemId));
   };
 
-  const addToCart = (item: CartItem) => {
+  const addToCart = (item: CartItem, selected: boolean = false) => {
     const existingItemIndex = cartItems.findIndex(
       (cartItem) => cartItem.barangId === item.barangId
     );
@@ -67,7 +73,7 @@ export const CartProvider = ({ children }: PropsWithChildren<{}>) => {
       return;
     }
 
-    setCartItems((prevItems) => [...prevItems, item]);
+    setCartItems((prevItems) => [...prevItems, { ...item, selected }]);
   };
 
   const removeFromCart = (itemId: string | number) => {
@@ -84,6 +90,14 @@ export const CartProvider = ({ children }: PropsWithChildren<{}>) => {
     );
   };
 
+  const setItemSelected = (itemId: string, selected: boolean) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.barangId === itemId ? { ...item, selected } : item
+      )
+    );
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -92,6 +106,7 @@ export const CartProvider = ({ children }: PropsWithChildren<{}>) => {
         removeFromCart,
         getFromCart,
         editCartItem,
+        setItemSelected,
       }}
     >
       {children}

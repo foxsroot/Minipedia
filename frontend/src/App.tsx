@@ -14,6 +14,7 @@ import "./styles/main.css";
 import ProductDetail from "./pages/ProductDetail";
 import { CartProvider } from "./contexts/CartContext";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 
 const App = () => {
   return (
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="/manage-order" element={<ManageOrder />} />
           <Route path="/product/:barangId" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
         </Routes>
       </Router>
     </CartProvider>

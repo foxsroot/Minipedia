@@ -91,18 +91,18 @@ const ProductDetail = () => {
         <Box sx={{ maxWidth: "100vw", mx: "auto", px: 2 }}>
           <Grid container spacing={4} justifyContent="center">
             {/* Image Column */}
-            <Grid item xs={12} md={4}>
-              <Card elevation={1}>
+            <Grid item xs={12} md={4} sx={{ width: "20em", height: "20em" }}>
+              <Card elevation={1} sx={{ width: "20em", height: "20em" }}>
                 <CardMedia
                   component="img"
-                  image={
-                    "https://images.tokopedia.net/img/cache/900/VqbcmM/2024/2/23/7a687776-af5d-49a8-bb11-469f0b378a9e.jpg"
-                  }
+                  image={`${import.meta.env.VITE_STATIC_URL}/${
+                    barang?.fotoBarang
+                  }`}
                   alt="Product Image"
                   sx={{
                     objectFit: "cover",
-                    width: "25rem",
-                    height: "25rem",
+                    width: "100%",
+                    height: "100%",
                     borderRadius: 2,
                   }}
                 />

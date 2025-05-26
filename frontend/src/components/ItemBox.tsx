@@ -62,7 +62,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
       <Box sx={{ position: "relative", width: "100%", height: 180 }}>
         <Box
           component="img"
-          src={fotoBarang}
+          src={fotoBarang.startsWith('http') ? fotoBarang : `${import.meta.env.VITE_STATIC_URL}/${fotoBarang}`}
           alt={namaBarang}
           sx={{
             width: "100%",
@@ -72,7 +72,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
             filter: stokBarang === 0 ? "brightness(50%)" : "none",
           }}
         />
-        {stokBarang !== undefined && (
+        {stokBarang !== 0 && (
           <Box
             sx={{
               position: "absolute",
@@ -91,7 +91,7 @@ const ItemBox: React.FC<ItemBoxProps> = ({
             {stokBarang === 0 ? "Stok Habis" : `${stokBarang} tersisa`}
           </Box>
         )}
-        {diskonProduk && (
+        {diskonProduk != 0 && (
           <Box
             sx={{
               position: "absolute",
