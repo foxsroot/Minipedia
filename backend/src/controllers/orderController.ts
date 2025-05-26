@@ -194,6 +194,15 @@ export const deleteOrder = async (req: Request, res: Response, next: NextFunctio
 
         order.statusPesanan = 'CANCELED';
         await order.save();
+
+        console.log('Order canceled:', order.orderItems);
+
+        for (const item of order.orderItems) {
+            const result = await updateStock(item.barangId, item.quantity);
+            if (result instanceof ApiError) {
+                return next(result);
+            }
+        }
         res.status(200).json({ message: 'Order canceled successfully' });
     } catch (err) {
         return next(new ApiError(500, 'Failed to cancel order'));

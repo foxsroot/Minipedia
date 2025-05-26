@@ -9,7 +9,7 @@ export async function updateStock(barangId: string, minQuantity: number) {
             throw new ApiError(404, `Barang with id ${barangId} not found`);
         }
 
-        if (barang.stokBarang < minQuantity) {
+        if (minQuantity < 0 && barang.stokBarang < (-1 * minQuantity)) {
             throw new ApiError(400, `Insufficient stock for barangId ${barangId}. Available: ${barang.stokBarang}, Required: ${minQuantity}`);
         }
 

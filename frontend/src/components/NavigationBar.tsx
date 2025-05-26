@@ -134,13 +134,18 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
   },
 }));
 
-const NavigationBar = () => {
+const NavigationBar = ({
+  onSearch,
+}: {
+  onSearch?: (query: string) => void;
+}) => {
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const { cartItems, clearCart } = useCartContext();
   const [cartItemsTotal, setCartItemsTotal] = useState<number>(0);
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     setCartItemsTotal(cartItems.length);
@@ -209,8 +214,18 @@ const NavigationBar = () => {
         </Box>
 
         <SearchBar>
-          <SearchInput placeholder="Search in MiniPedia" />
-          <SearchButton aria-label="Cari">
+          <SearchInput
+            placeholder="Search in MiniPedia"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (onSearch) onSearch(searchQuery);
+            }}
+          />
+          <SearchButton
+            aria-label="Cari"
+            onClick={() => onSearch && onSearch(searchQuery)}
+          >
             <FaSearch />
           </SearchButton>
         </SearchBar>

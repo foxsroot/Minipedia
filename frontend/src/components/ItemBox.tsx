@@ -76,25 +76,25 @@ const ItemBox: React.FC<ItemBoxProps> = ({
             filter: stokBarang === 0 ? "brightness(50%)" : "none",
           }}
         />
-        {stokBarang !== 0 && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: 8,
-              left: 8,
-              bgcolor: stokBarang === 0 ? "#d32f2f" : "#fff",
-              color: stokBarang === 0 ? "#fff" : "#d32f2f",
-              fontWeight: 700,
-              fontSize: "0.75rem",
-              px: 1,
-              py: 0.25,
-              borderRadius: 1,
-              boxShadow: 1,
-            }}
-          >
-            {stokBarang === 0 ? "Stok Habis" : `${stokBarang} tersisa`}
-          </Box>
-        )}
+
+        <Box
+          sx={{
+            position: "absolute",
+            top: 8,
+            left: 8,
+            bgcolor: stokBarang === 0 ? "#d32f2f" : "#fff",
+            color: stokBarang === 0 ? "#fff" : "#d32f2f",
+            fontWeight: 700,
+            fontSize: "0.75rem",
+            px: 1,
+            py: 0.25,
+            borderRadius: 1,
+            boxShadow: 1,
+          }}
+        >
+          {stokBarang == 0 ? "Stok Habis" : `${stokBarang} tersisa`}
+        </Box>
+
         {diskonProduk != 0 && (
           <Box
             sx={{

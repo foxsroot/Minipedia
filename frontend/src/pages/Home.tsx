@@ -22,11 +22,11 @@ const Home = () => {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<number[]>([0, 5000000]);
   const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(5000000);
-  const [selectedRating, setSelectedRating] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<number>(10000000);
   const [onlyAvailable, setOnlyAvailable] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [barangs, setBarangs] = useState<Barang[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const navigate = useNavigate();
 
@@ -82,17 +82,26 @@ const Home = () => {
     const matchLocation =
       selectedLocations.length === 0 ||
       selectedLocations.includes(barang.toko.lokasiToko || "");
-    const matchAvailability = onlyAvailable ? barang.stokBarang == 0 : true;
+    const matchAvailability = onlyAvailable ? barang.stokBarang != 0 : true;
     const matchCategory = selectedCategory
       ? barang.kategoriProduk === selectedCategory
       : true;
+    const matchSearch =
+      searchQuery.trim() === "" ||
+      barang.namaBarang.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return inPriceRange && matchLocation && matchAvailability && matchCategory;
+    return (
+      inPriceRange &&
+      matchLocation &&
+      matchAvailability &&
+      matchCategory &&
+      matchSearch
+    );
   });
 
   return (
     <div className="home-tokopedia-bg">
-      <NavigationBar />
+      <NavigationBar onSearch={(query) => setSearchQuery(query)} />
 
       <Box sx={{ display: "flex", p: 2 }}>
         {/* Filter Sidebar */}
@@ -122,9 +131,18 @@ const Home = () => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
                 <MenuItem value="">Semua</MenuItem>
-                <MenuItem value="Meja">Meja</MenuItem>
-                <MenuItem value="Keyboard">Keyboard</MenuItem>
-                <MenuItem value="Monitor">Monitor</MenuItem>
+                <MenuItem value="ELECTRONICS">Electronics</MenuItem>
+                <MenuItem value="FASHION">Fashion</MenuItem>
+                <MenuItem value="BEAUTY_HEALTH">Beauty & Health</MenuItem>
+                <MenuItem value="HOME_LIVING">Home & Living</MenuItem>
+                <MenuItem value="AUTOMOTIVE">Automotive</MenuItem>
+                <MenuItem value="SPORTS_OUTDOORS">Sports & Outdoors</MenuItem>
+                <MenuItem value="HOBBIES">Hobbies</MenuItem>
+                <MenuItem value="BOOKS">Books</MenuItem>
+                <MenuItem value="BABY_TOYS">Baby & Toys</MenuItem>
+                <MenuItem value="FOOD_BEVERAGES">Food & Beverages</MenuItem>
+                <MenuItem value="OFFICE_SUPPLIES">Office Supplies</MenuItem>
+                <MenuItem value="OTHER">Other</MenuItem>
               </Select>
             </FormControl>
 
@@ -191,22 +209,6 @@ const Home = () => {
                 fullWidth
               />
             </Box>
-
-            <Typography variant="subtitle2" sx={{ mt: 2 }}>
-              Rating
-            </Typography>
-            <FormControl fullWidth size="small">
-              <Select
-                value={selectedRating}
-                onChange={(e) => setSelectedRating(e.target.value)}
-                displayEmpty
-              >
-                <MenuItem value="">Semua</MenuItem>
-                <MenuItem value="4.5">4.5 ke atas</MenuItem>
-                <MenuItem value="4">4.0 ke atas</MenuItem>
-                <MenuItem value="3.5">3.5 ke atas</MenuItem>
-              </Select>
-            </FormControl>
 
             <FormControlLabel
               control={

@@ -77,6 +77,8 @@ const ProductDetail = () => {
     if (barangId) {
       fetchProductDetails(barangId);
     }
+
+    console.log("Detail Barang:", barang);
   }, []);
 
   useEffect(() => {
@@ -120,13 +122,13 @@ const ProductDetail = () => {
                 <Box
                   sx={{ display: "flex", gap: 1, mt: 1, alignItems: "center" }}
                 >
-                  {barang?.jumlahTerjual == 0 ? (
+                  {!barang?.jumlahTerjual || barang.jumlahTerjual === 0 ? (
                     <Typography variant="body2" color="text.secondary">
                       Belum Terjual🤣
                     </Typography>
                   ) : (
                     <Typography variant="body2" color="text.secondary">
-                      Terjual {barang?.jumlahTerjual}
+                      Terjual {barang.jumlahTerjual}
                     </Typography>
                   )}
                 </Box>
