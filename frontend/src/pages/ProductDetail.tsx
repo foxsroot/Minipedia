@@ -231,14 +231,6 @@ const ProductDetail = () => {
                 >
                   + Keranjang
                 </Button>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  color="success"
-                  sx={{ mt: 1 }}
-                >
-                  Beli Langsung
-                </Button>
 
                 <Box
                   sx={{
