@@ -44,7 +44,7 @@ const statusColor = (status: string) => {
 
 const statusLabel = (status: string) => {
   switch (status) {
-    case "":
+    case null:
       return "Pending";
     case "PACKED":
       return "Diproses";
@@ -203,6 +203,7 @@ const OrderHistory: React.FC = () => {
                     flexDirection={{ xs: "column", md: "row" }}
                     justifyContent="space-between"
                     alignItems={{ md: "center" }}
+                    width={"26.9vw"}
                   >
                     <Box
                       display="flex"
@@ -268,11 +269,15 @@ const OrderHistory: React.FC = () => {
                             p: 1.5,
                             boxShadow: 1,
                             transition: "box-shadow 0.2s, transform 0.2s",
+                            cursor: "pointer",
                             "&:hover": {
                               boxShadow: 3,
                               transform: "scale(1.02)",
                             },
                           }}
+                          onClick={() =>
+                            navigate(`/product/${item.barang.barangId}`)
+                          }
                         >
                           <Box
                             component="img"
@@ -280,9 +285,7 @@ const OrderHistory: React.FC = () => {
                               item.barang.fotoBarang &&
                               item.barang.fotoBarang.startsWith("http")
                                 ? item.barang.fotoBarang
-                                : `${import.meta.env.VITE_STATIC_URL}/${
-                                    item.barang.fotoBarang
-                                  }`
+                                : `${import.meta.env.VITE_STATIC_URL}/${item.barang.fotoBarang}`
                             }
                             alt={item.barang.namaBarang}
                             sx={{
@@ -312,9 +315,19 @@ const OrderHistory: React.FC = () => {
                       </Grid>
                     ))}
                   </Grid>
-                  <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
-                    {order.statusPengiriman === "PENDING" &&
-                      order.statusPesanan != "CANCELED" && (
+                  <Box display="flex" justifyContent="flex-start" mt={2} gap={2}>
+                    {order.statusPesanan === "CANCELED" ? (
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        sx={{ fontWeight: 600 }}
+                        disabled
+                      >
+                        Pesanan Dibatalkan
+                      </Button>
+                    ) : (
+                      order.statusPengiriman === null &&
+                      order.statusPesanan !== "CANCELED" && (
                         <Button
                           variant="outlined"
                           color="error"
@@ -323,8 +336,9 @@ const OrderHistory: React.FC = () => {
                         >
                           Batalkan Pesanan
                         </Button>
-                      )}
-                    {order.statusPengiriman === "SHIPPED" && (
+                      )
+                    )}
+                    {/* {order.statusPengiriman === "SHIPPED" && (
                       <Button
                         variant="contained"
                         color="success"
@@ -332,18 +346,7 @@ const OrderHistory: React.FC = () => {
                       >
                         Konfirmasi Terima
                       </Button>
-                    )}
-                    <Button
-                      variant="text"
-                      sx={{ fontWeight: 600, color: "#03ac0e" }}
-                      onClick={() =>
-                        navigate(
-                          `/product/${order.orderItems[0].barang.barangId}`
-                        )
-                      }
-                    >
-                      Lihat Detail
-                    </Button>
+                    )} */}
                   </Box>
                 </Paper>
               </Grid>

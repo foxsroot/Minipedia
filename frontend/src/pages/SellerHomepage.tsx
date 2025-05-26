@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import SellerNavbar from "../components/SellerNavbar";
 import SellerSidebar from "../components/SellerSidebar";
-import { Line, Bar } from "@ant-design/charts";
+import { Line, Column } from "@ant-design/charts";
 
 const SellerHomepage = () => {
   const [aggregatedData, setAggregatedData] = useState<
@@ -50,10 +50,10 @@ const SellerHomepage = () => {
                     item.barang && item.barang.hargaBarang
                       ? Number(item.barang.hargaBarang)
                       : Number(
-                          tokoBarang.find(
-                            (b: any) => b.barangId === item.barangId
-                          )?.hargaBarang
-                        ) || 0;
+                        tokoBarang.find(
+                          (b: any) => b.barangId === item.barangId
+                        )?.hargaBarang
+                      ) || 0;
                   revenue += quantity * price;
                 });
               }
@@ -89,7 +89,12 @@ const SellerHomepage = () => {
     yField: "revenue",
     height: 250,
     color: "#03ac0e",
-    label: { position: "middle", style: { fill: "#fff" } },
+    label: {
+      position: "middle",
+      style: { fill: "#fff" },
+      formatter: (datum: any) =>
+        new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(datum.revenue)
+    }
   };
 
   return (
@@ -130,7 +135,7 @@ const SellerHomepage = () => {
               <h3 style={{ marginBottom: 16, color: "#03ac0e" }}>
                 Total Revenue (7 Days)
               </h3>
-              <Bar {...barConfig} />
+              <Column {...barConfig} />
             </div>
           </div>
         </main>

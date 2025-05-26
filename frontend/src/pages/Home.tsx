@@ -20,9 +20,9 @@ import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<number[]>([0, 5000000]);
+  const [priceRange, setPriceRange] = useState<number[]>([0, 100000000]);
   const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(10000000);
+  const [maxPrice, setMaxPrice] = useState<number>(100000000);
   const [onlyAvailable, setOnlyAvailable] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [barangs, setBarangs] = useState<Barang[]>([]);
@@ -187,7 +187,7 @@ const Home = () => {
               onChange={handlePriceChange}
               valueLabelDisplay="auto"
               min={0}
-              max={5000000}
+              max={100000000}
               step={100000}
               sx={{ color: "#03ac0e" }}
             />
