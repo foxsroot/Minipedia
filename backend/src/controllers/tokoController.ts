@@ -232,6 +232,7 @@ export const getCurrentUserToko = async (req: Request, res: Response, next: Next
                     barangId: item.barangId,
                     jumlah: item.jumlah,
                     barang: item.barang,
+                    hargaBarang: item.hargaBarang,
                 })),
             })),
         };
