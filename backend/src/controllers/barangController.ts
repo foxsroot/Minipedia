@@ -74,6 +74,13 @@ export const createBarang = async (req: Request, res: Response, next: NextFuncti
     }
 
     try {
+        // If file is uploaded, set fotoBarang to the uploaded file's filename
+        if (req.file) {
+            req.body.fotoBarang = `${req.file.filename}`;
+        } else {
+            return next(new ApiError(400, 'Foto barang harus diupload'));
+        }
+
         const barang = await Barang.create(
             {
                 namaBarang: req.body.namaBarang,
@@ -116,6 +123,11 @@ export const updateBarang = async (req: Request, res: Response, next: NextFuncti
 
         if (barang.tokoId !== tokoId) {
             return next(new ApiError(403, 'Forbidden: You do not have permission to update this barang'));
+        }
+
+        // If a new file is uploaded, update fotoBarang
+        if (req.file) {
+            req.body.fotoBarang = `${req.file.filename}`;
         }
 
         await barang.update(req.body);

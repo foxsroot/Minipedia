@@ -5,7 +5,7 @@ const RegisterToko = () => {
   const [namaToko, setNamaToko] = useState("");
   const [lokasiToko, setLokasiToko] = useState("");
   const [message, setMessage] = useState("");
-
+  const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -21,6 +21,7 @@ const RegisterToko = () => {
         setMessage("Toko berhasil didaftarkan!");
         setNamaToko("");
         setLokasiToko("");
+        navigate("/seller-homepage"); // Redirect to home or another page after successful registration
       } else {
         const data = await response.json();
         setMessage(data.message || "Gagal mendaftarkan toko.");
