@@ -16,22 +16,24 @@ import { useNavigate } from "react-router-dom";
 
 const STATUS_OPTIONS = [
   { label: "Semua", value: "ALL" },
-  { label: "Pending", value: "PENDING" },
-  { label: "Diproses", value: "PROCESSING" },
-  { label: "Dikirim", value: "SHIPPING" },
-  { label: "Selesai", value: "COMPLETED" },
+  { label: "Pending", value: "" },
+  { label: "Diproses", value: "PACKED" },
+  { label: "Dikirim", value: "SHIPPED" },
+  { label: "Terkirim", value: "DELIVERED" },
   { label: "Dibatalkan", value: "CANCELED" },
 ];
 
+// "PENDING", "PROCESSING", "SHIPPING", "COMPLETED", "CANCELED"
+
 const statusColor = (status: string) => {
   switch (status) {
-    case "PENDING":
+    case "":
       return "warning";
-    case "PROCESSING":
+    case "PACKED":
       return "info";
-    case "SHIPPING":
+    case "SHIPPED":
       return "primary";
-    case "COMPLETED":
+    case "DELIVERED":
       return "success";
     case "CANCELED":
       return "error";
@@ -42,14 +44,14 @@ const statusColor = (status: string) => {
 
 const statusLabel = (status: string) => {
   switch (status) {
-    case "PENDING":
+    case "":
       return "Pending";
-    case "PROCESSING":
+    case "PACKED":
       return "Diproses";
-    case "SHIPPING":
+    case "SHIPPED":
       return "Dikirim";
-    case "COMPLETED":
-      return "Selesai";
+    case "DELIVERED":
+      return "Terkirim";
     case "CANCELED":
       return "Dibatalkan";
     default:
@@ -95,7 +97,21 @@ const OrderHistory: React.FC = () => {
           (o) =>
             o.userId ===
               JSON.parse(atob(localStorage.getItem("token")!.split(".")[1]))
-                .userId && o.statusPesanan === STATUS_OPTIONS[tab].value
+                .userId &&
+            (tab === 1
+              ? !o.statusPengiriman && o.statusPesanan !== "CANCELED" // Pending
+              : tab === 2
+              ? o.statusPengiriman === "PACKED" &&
+                o.statusPesanan !== "CANCELED"
+              : tab === 3
+              ? o.statusPengiriman === "SHIPPED" &&
+                o.statusPesanan !== "CANCELED"
+              : tab === 4
+              ? o.statusPengiriman === "DELIVERED" &&
+                o.statusPesanan !== "CANCELED"
+              : tab === 5
+              ? o.statusPesanan === "CANCELED"
+              : true)
         );
 
   const handleCancelOrder = async (orderId: string) => {
@@ -195,8 +211,16 @@ const OrderHistory: React.FC = () => {
                       flexWrap="wrap"
                     >
                       <Chip
-                        label={statusLabel(order.statusPesanan)}
-                        color={statusColor(order.statusPesanan)}
+                        label={statusLabel(
+                          order.statusPesanan == "CANCELED"
+                            ? order.statusPesanan
+                            : order.statusPengiriman
+                        )}
+                        color={statusColor(
+                          order.statusPesanan == "CANCELED"
+                            ? order.statusPesanan
+                            : order.statusPengiriman
+                        )}
                         sx={{
                           fontWeight: 700,
                           fontSize: 14,
@@ -289,17 +313,18 @@ const OrderHistory: React.FC = () => {
                     ))}
                   </Grid>
                   <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
-                    {order.statusPesanan === "PENDING" && (
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        sx={{ fontWeight: 600 }}
-                        onClick={() => handleCancelOrder(order.orderId)}
-                      >
-                        Batalkan Pesanan
-                      </Button>
-                    )}
-                    {order.statusPesanan === "SHIPPING" && (
+                    {order.statusPengiriman === "PENDING" &&
+                      order.statusPesanan != "CANCELED" && (
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          sx={{ fontWeight: 600 }}
+                          onClick={() => handleCancelOrder(order.orderId)}
+                        >
+                          Batalkan Pesanan
+                        </Button>
+                      )}
+                    {order.statusPengiriman === "SHIPPED" && (
                       <Button
                         variant="contained"
                         color="success"
