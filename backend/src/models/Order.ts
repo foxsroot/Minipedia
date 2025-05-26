@@ -73,7 +73,7 @@ export class Order extends Model {
     declare tanggalBarangDiterima: Date;
 
     @Column({
-        type: DataType.ENUM("PACKED", "SHIPPED", "DELIVERED"),
+        type: DataType.ENUM("PACKED", "SHIPPED", "DELIVERED", "COMPLETED", "PENDING"),
         allowNull: true,
     })
     declare statusPengiriman: string

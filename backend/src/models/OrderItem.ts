@@ -42,6 +42,12 @@ export class OrderItem extends Model {
     declare persentaseDiskon: number;
 
     @Column({
+        type: DataType.DOUBLE,
+        allowNull: false
+    })
+    declare hargaBarang: number;
+
+    @Column({
         type: DataType.DATE,
         allowNull: false,
         defaultValue: DataType.NOW

@@ -21,11 +21,16 @@ const RegisterToko = () => {
           body: JSON.stringify({ namaToko, lokasiToko }),
         }
       );
-      if (response.ok) {
+
+      const responseBody = await response.json();
+      console.log(responseBody);
+
+      if (responseBody) {
         setMessage("Toko berhasil didaftarkan!");
+        localStorage.setItem("token", responseBody.token);
         setNamaToko("");
         setLokasiToko("");
-        navigate("/seller-homepage"); // Redirect to home or another page after successful registration
+        navigate("/seller-homepage");
       } else {
         const data = await response.json();
         setMessage(data.message || "Gagal mendaftarkan toko.");

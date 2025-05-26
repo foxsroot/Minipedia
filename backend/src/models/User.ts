@@ -4,7 +4,7 @@ import { Order } from "./Order";
 
 @Table({
     tableName: "user",
-    timestamps: false,
+    timestamps: true, // <-- enable timestamps for paranoid to work
     paranoid: true,
     deletedAt: "deleted_at"
 })

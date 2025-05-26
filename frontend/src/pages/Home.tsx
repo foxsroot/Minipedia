@@ -30,6 +30,10 @@ const Home = () => {
 
   const navigate = useNavigate();
 
+  if (localStorage.getItem("token") === null) {
+    navigate("/login");
+  }
+
   const fetchBarangs = async () => {
     try {
       const response = await fetch(
