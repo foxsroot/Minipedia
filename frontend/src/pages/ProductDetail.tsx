@@ -39,6 +39,7 @@ const ProductDetail = () => {
       addToCart({
         barangId: barang.barangId,
         quantity: quantity,
+        checked: false,
       });
     }
   };

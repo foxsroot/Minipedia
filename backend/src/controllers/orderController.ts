@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { decryptUserFields } from '../utils/encryption';
 import { Order, User, OrderItem, Barang, Toko } from '../models/index';
 import { ApiError } from '../utils/ApiError';
+import { updateStock } from '../services/updateStock';
 
 export const getOrderById = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -90,6 +91,14 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
                 ]
             }
         );
+
+        const result = await Promise.all(
+            req.body.orderItems.map((item: any) => updateStock(item.barangId, item.quantity))
+        );
+
+        if (result instanceof ApiError) {
+            return next(result);
+        }
 
         res.status(201).json({
             ...order.toJSON(),

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import CheckoutDialog from "../components/CheckoutDialog";
 import {
   Box,
@@ -9,9 +9,10 @@ import {
   CssBaseline,
   Button,
 } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../styles/main.css";
 import NavigationBar from "../components/NavigationBar";
+import { useCartContext } from "../contexts/CartContext";
 
 interface CheckOutProps {
   productId: string;
@@ -48,7 +49,10 @@ const Checkout = () => {
   const [items, setItems] = useState<
     (Barang & { quantity: number; totalPrice: number })[]
   >([]);
+  const { removeFromCart } = useCartContext();
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const cartItemsRaw = localStorage.getItem("cartItems");
@@ -104,48 +108,19 @@ const Checkout = () => {
         const errorData = await response.json();
         alert(errorData.message || "Gagal membuat pesanan.");
         return;
+      } else {
+        orderItems.forEach((item) => {
+          removeFromCart(item.barangId);
+        });
+
+        setCheckoutItems([]);
+
+        navigate("/");
       }
 
       const data = await response.json();
       alert("Pesanan berhasil dibuat! Order ID: " + data.orderId);
       setDialogOpen(false);
-    } catch (err) {
-      alert("Terjadi kesalahan saat checkout.");
-      console.error(err);
-    }
-  };
-
-  const handleCheckout = async () => {
-    try {
-      const orderItems = items.map((item) => ({
-        barangId: item.barangId,
-        quantity: item.quantity,
-      }));
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/order`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            orderItems,
-          }),
-        }
-      );
-
-      console.log(JSON.stringify(orderItems));
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.message || "Gagal membuat pesanan.");
-        return;
-      }
-
-      const data = await response.json();
-      alert("Pesanan berhasil dibuat! Order ID: " + data.orderId);
     } catch (err) {
       alert("Terjadi kesalahan saat checkout.");
       console.error(err);
