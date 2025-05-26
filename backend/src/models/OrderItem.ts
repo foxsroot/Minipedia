@@ -61,13 +61,6 @@ export class OrderItem extends Model {
     })
     declare updatedAt: Date;
 
-    @Column({
-        type: DataType.DOUBLE,
-        allowNull: false,
-        defaultValue: 0,
-    })
-    declare hargaBarang: number;
-
     @BelongsTo(() => Order)
     declare order: Order;
 
