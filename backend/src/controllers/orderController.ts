@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { decryptUserFields } from '../utils/encryption';
 import { Order, User, OrderItem, Barang, Toko } from '../models/index';
 import { ApiError } from '../utils/ApiError';
+import { v4 as uuidv4 } from "uuid";
 
 export const getOrderById = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -180,6 +181,30 @@ export const deleteOrder = async (req: Request, res: Response, next: NextFunctio
     } catch (err) {
         return next(new ApiError(500, 'Failed to delete order'));
     }
+};
+
+export const updateOrderStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { orderId } = req.params;
+    const { statusPengiriman } = req.body;
+
+    const order = await Order.findByPk(orderId);
+    if (!order) {
+      return next(new ApiError(404, "Order not found"));
+    }
+
+    // If status is being set to PACKED for the first time, generate nomorResi
+    if (statusPengiriman === "PACKED" && !order.nomorResi) {
+      order.nomorResi = uuidv4();
+    }
+
+    order.statusPengiriman = statusPengiriman;
+    await order.save();
+
+    res.json({ message: "Order status updated", nomorResi: order.nomorResi });
+  } catch (err) {
+    return next(new ApiError(500, err instanceof Error ? err.message : "Failed to update order status"));
+  }
 };
 
 
