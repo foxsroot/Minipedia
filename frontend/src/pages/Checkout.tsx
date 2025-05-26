@@ -115,7 +115,7 @@ const Checkout = () => {
 
         setCheckoutItems([]);
 
-        navigate("/");
+        navigate("/order-history");
       }
 
       const data = await response.json();
