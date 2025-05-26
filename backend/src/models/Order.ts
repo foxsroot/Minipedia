@@ -92,6 +92,13 @@ export class Order extends Model {
     })
     declare updatedAt: Date;
 
+    @Column({
+        type: DataType.DOUBLE,
+        allowNull: false,
+        defaultValue: 0,
+    })
+    declare totalHarga: number;
+
     @BelongsTo(() => User)
     declare user: User;
 
