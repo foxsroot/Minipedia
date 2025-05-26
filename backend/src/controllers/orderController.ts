@@ -37,8 +37,13 @@ export const getOrderById = async (req: Request, res: Response, next: NextFuncti
 };
 
 export const getAllOrders = async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return next(new ApiError(401, 'Unauthorized: User not authenticated'));
+    }
+
     try {
         const orders = await Order.findAll({
+            where: { userId: req.user.userId }, // Filter orders by the logged-in user's ID
             include: [
                 {
                     model: User,
@@ -62,7 +67,7 @@ export const getAllOrders = async (req: Request, res: Response, next: NextFuncti
 
         res.json(result);
     } catch (err) {
-        return next(new ApiError(500, 'Failed to get all orders'));
+        return next(new ApiError(500, 'Failed to get user-specific orders'));
     }
 };
 
@@ -242,6 +247,48 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
         res.json({ message: "Order status updated", nomorResi: order.nomorResi });
     } catch (err) {
         return next(new ApiError(500, err instanceof Error ? err.message : "Failed to update order status"));
+    }
+};
+
+export const getTokoAllOrder = async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return next(new ApiError(401, 'Unauthorized: User not authenticated'));
+    }
+
+    try {
+        const orders = await Order.findAll({
+            // No direct where condition on Order since it does not contain tokoId
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['nama', 'email', 'nomorTelpon', 'username']
+                },
+                {
+                    model: OrderItem,
+                    as: 'orderItems',
+                    required: true, // only include orders that have matching orderItems
+                    include: [
+                        {
+                            model: Barang,
+                            as: 'barang',
+                            where: { tokoId: req.user.tokoId }, // filter orderItems by barang belonging to current user's toko
+                            attributes: ['barangId', 'namaBarang', 'tokoId']
+                        }
+                    ]
+                }
+            ]
+        });
+
+        const result = orders.map(order => {
+            const o = order.toJSON();
+            if (o.user) o.user = decryptUserFields(o.user);
+            return o;
+        });
+
+        res.json(result);
+    } catch (err) {
+        return next(new ApiError(500, 'Failed to get orders for current user toko'));
     }
 };
 

@@ -30,13 +30,14 @@ const ManageOrder = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/order`, {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/order/toko-owner/me`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
         if (res.ok) {
           const orderData = await res.json();
+          console.log("Fetched orders:", orderData);
           setOrders(orderData || []); // Set the orders list
         } else {
           setOrders([]);

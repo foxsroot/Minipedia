@@ -1,5 +1,5 @@
 import express from 'express';
-import { getOrderById, getAllOrders, createOrder, updateOrder, deleteOrder, updateOrderStatus } from '../controllers/orderController';
+import { getOrderById, getAllOrders, createOrder, updateOrder, deleteOrder, updateOrderStatus, getTokoAllOrder } from '../controllers/orderController';
 import { authenticateToken } from '../middlewares/authMiddleware';
 
 const orderRouter = express.Router();
@@ -10,5 +10,6 @@ orderRouter.post('/', authenticateToken, createOrder);
 orderRouter.put('/:id', authenticateToken, updateOrder);
 orderRouter.delete('/:id', authenticateToken, deleteOrder);
 orderRouter.put('/:orderId/update-status', authenticateToken, updateOrderStatus);
+orderRouter.get('/toko-owner/me', authenticateToken, getTokoAllOrder);
 
 export default orderRouter;
