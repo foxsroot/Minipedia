@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Barang, Toko, Order, OrderItem } from '../models/index';
+import { User, Barang, Toko, Order, OrderItem } from '../models/index';
 import { ApiError } from '../utils/ApiError';
 import { Op } from 'sequelize';
 import jwt from "jsonwebtoken";
