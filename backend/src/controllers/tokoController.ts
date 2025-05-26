@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Barang, Toko, Order, OrderItem } from '../models/index';
 import { ApiError } from '../utils/ApiError';
 import { Op } from 'sequelize';
+import jwt from "jsonwebtoken";
 
 export const getTokoById = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -87,7 +88,21 @@ export const createToko = async (req: Request, res: Response, next: NextFunction
         };
 
         const toko = await Toko.create(newToko);
-        res.status(201).json({ "toko": toko });
+
+        // Generate a new JWT with tokoId
+        const JWT_SECRET = process.env.JWT_TOKEN_SECRET;
+        if (!JWT_SECRET) {
+            throw new Error('JWT_SECRET is not defined in the environment variables.');
+        }
+
+        const expiresIn = parseInt(process.env.JWT_EXPIRES_IN || '604800', 10);
+        const payload = {
+            userId,
+            tokoId: toko.tokoId
+        };
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn });
+
+        res.status(201).json({ toko, token });
     } catch (err) {
         next(new ApiError(500, 'Failed to create toko'));
     }

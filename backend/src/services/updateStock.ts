@@ -13,7 +13,7 @@ export async function updateStock(barangId: string, minQuantity: number) {
             throw new ApiError(400, `Insufficient stock for barangId ${barangId}. Available: ${barang.stokBarang}, Required: ${minQuantity}`);
         }
 
-        barang.stokBarang -= minQuantity;
+        barang.stokBarang += minQuantity;
         await barang.save();
         return barang;
     } catch (error) {

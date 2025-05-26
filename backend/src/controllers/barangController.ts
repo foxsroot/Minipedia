@@ -25,7 +25,7 @@ export const getAllBarangs = async (req: Request, res: Response, next: NextFunct
                     as: 'toko',
                     attributes: ['namaToko', 'lokasiToko']
                 }
-            ]
+            ],
         });
 
         const barangIds = barangs.map(b => b.barangId);

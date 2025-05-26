@@ -10,11 +10,22 @@ import {
   TableBody,
   Paper,
   Button,
+  Box,
+  Chip,
 } from "@mui/material";
+
+const statusFilters = [
+  { label: "All", value: "ALL" },
+  { label: "Pending", value: "PENDING" },
+  { label: "Packed", value: "PACKED" },
+  { label: "Shipped", value: "SHIPPED" },
+  { label: "Completed", value: "DELIVERED" },
+];
 
 const ManageOrder = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -40,16 +51,20 @@ const ManageOrder = () => {
     fetchOrders();
   }, []);
 
-  const handleAction = async (orderId: string, currentStatus: string) => {
+  const handleAction = async (orderId: string, currentStatus: string | null) => {
     try {
-      const nextStatus =
-        currentStatus === "PACKED"
-          ? "SHIPPED"
-          : currentStatus === "SHIPPED"
-          ? "DELIVERED"
-          : currentStatus;
+      let nextStatus = currentStatus;
+      let nomorResi = undefined;
 
-      const res = await fetch(`/api/orders/${orderId}/update-status`, {
+      if (currentStatus === null) {
+        nextStatus = "PACKED";
+      } else if (currentStatus === "PACKED") {
+        nextStatus = "SHIPPED";
+      } else if (currentStatus === "SHIPPED") {
+        nextStatus = "DELIVERED";
+      }
+
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/order/${orderId}/update-status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -59,10 +74,11 @@ const ManageOrder = () => {
       });
 
       if (res.ok) {
+        const updated = await res.json();
         setOrders((prevOrders) =>
           prevOrders.map((order) =>
             order.orderId === orderId
-              ? { ...order, statusPengiriman: nextStatus }
+              ? { ...order, statusPengiriman: nextStatus, nomorResi: updated.nomorResi || order.nomorResi }
               : order
           )
         );
@@ -73,6 +89,16 @@ const ManageOrder = () => {
       console.error("Error updating order status:", error);
     }
   };
+
+  // Filtered orders based on statusFilter
+  const filteredOrders = orders.filter((order) => {
+    if (statusFilter === "ALL") return true;
+    if (statusFilter === "PENDING") return order.statusPengiriman === null;
+    if (statusFilter === "PACKED") return order.statusPengiriman === "PACKED";
+    if (statusFilter === "SHIPPED") return order.statusPengiriman === "SHIPPED";
+    if (statusFilter === "DELIVERED") return order.statusPengiriman === "DELIVERED";
+    return true;
+  });
 
   return (
     <div>
@@ -93,6 +119,29 @@ const ManageOrder = () => {
               Orders Management
             </h2>
           </div>
+
+          {/* Status Filter Tags */}
+          <Box sx={{ mb: 2, display: "flex", gap: 1 }}>
+            {statusFilters.map((filter) => (
+              <Chip
+                key={filter.value}
+                label={filter.label}
+                clickable
+                sx={{
+                  backgroundColor: statusFilter === filter.value ? "#4CAF50" : "white", // Green for active, white for inactive
+                  color: statusFilter === filter.value ? "white" : "#4CAF50", // Text color
+                  border: "1px solid #4CAF50", // Green border
+                  borderRadius: "8px", // Less circular
+                  fontWeight: 600,
+                  "&:hover": {
+                    backgroundColor: statusFilter === filter.value ? "#45A049" : "#F1F8E9", // Slightly darker green on hover for active
+                  },
+                }}
+                onClick={() => setStatusFilter(filter.value)}
+              />
+            ))}
+          </Box>
+
           <TableContainer
             component={Paper}
             sx={{
@@ -163,14 +212,14 @@ const ManageOrder = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {orders.length === 0 && !loading ? (
+                {filteredOrders.length === 0 && !loading ? (
                   <TableRow>
                     <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                       Tidak ada pesanan.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  orders.map((order, idx) => (
+                  filteredOrders.map((order, idx) => (
                     <TableRow
                       key={order.orderId}
                       sx={{
@@ -197,7 +246,9 @@ const ManageOrder = () => {
                         <Button
                           variant="contained"
                           color={
-                            order.statusPengiriman === "PACKED"
+                            order.statusPengiriman === null
+                              ? "warning"
+                              : order.statusPengiriman === "PACKED"
                               ? "primary"
                               : order.statusPengiriman === "SHIPPED"
                               ? "success"
@@ -210,7 +261,9 @@ const ManageOrder = () => {
                             handleAction(order.orderId, order.statusPengiriman)
                           }
                         >
-                          {order.statusPengiriman === "PACKED"
+                          {order.statusPengiriman === null
+                            ? "Accept Order"
+                            : order.statusPengiriman === "PACKED"
                             ? "Kirim Produk"
                             : order.statusPengiriman === "SHIPPED"
                             ? "Delivered"

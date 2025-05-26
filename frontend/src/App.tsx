@@ -15,6 +15,8 @@ import ProductDetail from "./pages/ProductDetail";
 import { CartProvider } from "./contexts/CartContext";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import Profile from "./pages/Profile";
+import OrderHistory from "./pages/OrderHistory";
 
 const App = () => {
   return (
@@ -24,6 +26,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/dev" element={<Development />} />
           <Route path="/register-toko" element={<RegisterToko />} />
           <Route path="/update-toko" element={<UpdateToko />} />
@@ -35,6 +38,7 @@ const App = () => {
           <Route path="/product/:barangId" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-history" element={<OrderHistory />} />
         </Routes>
       </Router>
     </CartProvider>

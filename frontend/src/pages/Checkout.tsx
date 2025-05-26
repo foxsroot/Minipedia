@@ -366,6 +366,7 @@ const Checkout = () => {
           orderItems={items.map((item) => ({
             barangId: item.barangId,
             quantity: item.quantity,
+            hargaBarang: item.hargaBarang,
           }))}
         />
       </Box>
