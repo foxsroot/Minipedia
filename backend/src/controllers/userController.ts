@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { User, Toko } from '../models/index';
 import { encryptField, decryptUserFields } from '../utils/encryption';
 import { ApiError } from '../utils/ApiError';
+import bcrypt from 'bcrypt';
 
 // export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
 //     try {
@@ -96,7 +97,7 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
                 {
                     model: Toko,
                     as: 'toko',
-                    attributes: ["namaToko","lokasiToko", "tokoId"]
+                    attributes: ["namaToko", "lokasiToko", "tokoId"]
                 }
             ]
         });
@@ -122,3 +123,31 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
         next(new ApiError(500, 'Failed to get current user'));
     }
 };
+
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return next(new ApiError(401, 'Unauthorized: User not authenticated'));
+    }
+
+    const userId = req.user.userId;
+    const { oldPassword, newPassword } = req.body;
+
+    try {
+        const user = await User.findByPk(userId);
+
+        if (!user) {
+            return next(new ApiError(404, 'User not found'));
+        }
+
+        if (!await bcrypt.compare(oldPassword, user.password)) {
+            return next(new ApiError(400, 'Old password is incorrect'));
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        res.status(200).json({ message: 'Password changed successfully' });
+    } catch (err) {
+        next(new ApiError(500, 'Failed to change password'));
+    }
+}

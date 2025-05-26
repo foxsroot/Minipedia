@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useCartContext } from "../contexts/CartContext";
 
 const fadeInUpTokopedia = {
   from: {
@@ -30,6 +31,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { clearCart } = useCartContext();
 
   const navigate = useNavigate();
 
@@ -49,6 +51,7 @@ const Login: React.FC = () => {
       } else {
         localStorage.setItem("token", data.token);
         navigate("/");
+        clearCart();
       }
     } catch (err) {
       setError("Network error. Please try again.");

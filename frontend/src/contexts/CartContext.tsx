@@ -13,6 +13,7 @@ interface CartContextType {
   getFromCart: (itemId: string | number) => CartItemWithSelected | undefined;
   editCartItem: (itemId: string, quantity: number) => void;
   setItemSelected: (itemId: string, selected: boolean) => void;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType>({
@@ -22,6 +23,7 @@ const CartContext = createContext<CartContextType>({
   getFromCart: () => undefined,
   editCartItem: () => {},
   setItemSelected: () => {},
+  clearCart: () => {},
 });
 
 export const useCartContext = () => useContext(CartContext);
@@ -59,6 +61,11 @@ export const CartProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const getFromCart = (itemId: string | number) => {
     return cartItems.find((item) => String(item.barangId) === String(itemId));
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+    return;
   };
 
   const addToCart = (item: CartItem, selected: boolean = false) => {
@@ -107,6 +114,7 @@ export const CartProvider = ({ children }: PropsWithChildren<{}>) => {
         getFromCart,
         editCartItem,
         setItemSelected,
+        clearCart,
       }}
     >
       {children}

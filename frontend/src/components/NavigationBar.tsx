@@ -11,11 +11,21 @@ import {
   Box,
   ButtonBase,
   Button,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { FaSearch, FaRegUserCircle, FaShoppingCart } from "react-icons/fa";
+import {
+  FaSearch,
+  FaRegUserCircle,
+  FaShoppingCart,
+  FaUser,
+  FaClock,
+  FaSignOutAlt,
+} from "react-icons/fa";
 import { useCartContext } from "../contexts/CartContext";
-
 import type { TokoDetail } from "../interfaces/Toko";
 
 type UserType = {
@@ -100,12 +110,37 @@ const UserName = styled("span")(({ theme }) => ({
   transition: "color 0.2s",
 }));
 
+const StyledMenu = styled(Menu)(({ theme }) => ({
+  "& .MuiPaper-root": {
+    borderRadius: 10,
+    minWidth: 200,
+    boxShadow: "0 3px 12px rgba(0, 0, 0, 0.08)",
+    border: "1px solid #e0e0e0",
+  },
+}));
+
+const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
+  fontSize: "0.95rem",
+  padding: "10px 16px",
+  color: "#333",
+  transition: "background 0.2s, color 0.2s",
+  "&:hover": {
+    backgroundColor: "#e6f5ec",
+    color: "#03ac0e",
+  },
+  "& svg": {
+    fontSize: "1rem",
+    marginRight: "0.6rem",
+  },
+}));
+
 const NavigationBar = () => {
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
-  const { cartItems } = useCartContext();
+  const { cartItems, clearCart } = useCartContext();
   const [cartItemsTotal, setCartItemsTotal] = useState<number>(0);
   const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
     setCartItemsTotal(cartItems.length);
@@ -127,7 +162,6 @@ const NavigationBar = () => {
         });
         if (res.ok) {
           const data = await res.json();
-          console.log("User data fetched:", data);
           setUser(data);
         } else {
           setUser(null);
@@ -140,6 +174,30 @@ const NavigationBar = () => {
     };
     fetchUser();
   }, []);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    const blackListToken = await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    clearCart();
+    localStorage.removeItem("token");
+    setUser(null);
+    handleMenuClose();
+    navigate("/");
+  };
 
   return (
     <StyledAppBar position="sticky" elevation={0}>
@@ -215,18 +273,67 @@ const NavigationBar = () => {
               </UserIconLink>
             </Link>
           ) : (
-            <ButtonBase
-              component={Link}
-              to="/profile"
-              sx={{ display: "flex", alignItems: "center" }}
-            >
-              <Avatar
-                alt={user.nama}
-                src={"/default.png"}
-                sx={{ width: 40, height: 40 }}
-              />
-              <UserName>{user.nama}</UserName>
-            </ButtonBase>
+            <>
+              <ButtonBase
+                onMouseEnter={handleMenuOpen}
+                onClick={handleMenuOpen}
+                sx={{ display: "flex", alignItems: "center" }}
+              >
+                <Avatar
+                  alt={user.nama}
+                  src={"/default.png"}
+                  sx={{ width: 40, height: 40 }}
+                />
+                <UserName>{user.nama}</UserName>
+              </ButtonBase>
+
+              <StyledMenu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                MenuListProps={{ onMouseLeave: handleMenuClose }}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+              >
+                <StyledMenuItem
+                  onClick={() => {
+                    navigate("/profile");
+                    handleMenuClose();
+                  }}
+                >
+                  <ListItemIcon>
+                    <FaUser />
+                  </ListItemIcon>
+                  <ListItemText primary="Profile" />
+                </StyledMenuItem>
+                <StyledMenuItem
+                  onClick={() => {
+                    navigate("/order-history");
+                    handleMenuClose();
+                  }}
+                >
+                  <ListItemIcon>
+                    <FaClock />
+                  </ListItemIcon>
+                  <ListItemText primary="Order History" />
+                </StyledMenuItem>
+                <StyledMenuItem
+                  onClick={handleLogout}
+                  sx={{
+                    color: "#d32f2f", // red color
+                    "&:hover": {
+                      backgroundColor: "#fcebea",
+                      color: "#b71c1c",
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ color: "inherit" }}>
+                    <FaSignOutAlt />
+                  </ListItemIcon>
+                  <ListItemText primary="Logout" />
+                </StyledMenuItem>
+              </StyledMenu>
+            </>
           )}
         </Box>
       </Toolbar>

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { decryptUserFields } from '../utils/encryption';
 import { Order, User, OrderItem, Barang, Toko } from '../models/index';
 import { ApiError } from '../utils/ApiError';
+import { updateStock } from '../services/updateStock';
 import { v4 as uuidv4 } from "uuid";
 
 export const getOrderById = async (req: Request, res: Response, next: NextFunction) => {
@@ -92,6 +93,14 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
             }
         );
 
+        const result = await Promise.all(
+            req.body.orderItems.map((item: any) => updateStock(item.barangId, -item.quantity))
+        );
+
+        if (result instanceof ApiError) {
+            return next(result);
+        }
+
         res.status(201).json({
             ...order.toJSON(),
             orderId: order.orderId
@@ -166,7 +175,14 @@ export const updateOrder = async (req: Request, res: Response, next: NextFunctio
 
 export const deleteOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const order = await Order.findByPk(req.params.id);
+        const order = await Order.findByPk(req.params.id, {
+            include: [
+                {
+                    model: OrderItem,
+                    as: 'orderItems',
+                }
+            ]
+        });
 
         if (!order) {
             return next(new ApiError(404, 'Order not found'));
@@ -176,35 +192,48 @@ export const deleteOrder = async (req: Request, res: Response, next: NextFunctio
             return next(new ApiError(400, 'Order cannot be deleted if it has been shipped'));
         }
 
-        await order.destroy();
-        res.status(204).json({ message: 'Order deleted successfully' });
+        order.statusPesanan = 'CANCELED';
+        await order.save();
+        res.status(200).json({ message: 'Order canceled successfully' });
     } catch (err) {
-        return next(new ApiError(500, 'Failed to delete order'));
+        return next(new ApiError(500, 'Failed to cancel order'));
     }
 };
 
 export const updateOrderStatus = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { orderId } = req.params;
-    const { statusPengiriman } = req.body;
+    try {
+        const { orderId } = req.params;
+        const { statusPengiriman } = req.body;
 
-    const order = await Order.findByPk(orderId);
-    if (!order) {
-      return next(new ApiError(404, "Order not found"));
+        const order = await Order.findByPk(orderId, {
+            include: [
+                {
+                    model: OrderItem,
+                    as: 'orderItems',
+                }
+            ]
+        });
+        if (!order) {
+            return next(new ApiError(404, "Order not found"));
+        }
+
+        if (statusPengiriman === "PACKED" && !order.nomorResi) {
+            order.nomorResi = uuidv4();
+        }
+
+        if (statusPengiriman === "SHIPPED") {
+            for (const item of order.orderItems) {
+                await updateStock(item.barangId, -item.quantity);
+            }
+        }
+
+        order.statusPengiriman = statusPengiriman;
+        await order.save();
+
+        res.json({ message: "Order status updated", nomorResi: order.nomorResi });
+    } catch (err) {
+        return next(new ApiError(500, err instanceof Error ? err.message : "Failed to update order status"));
     }
-
-    // If status is being set to PACKED for the first time, generate nomorResi
-    if (statusPengiriman === "PACKED" && !order.nomorResi) {
-      order.nomorResi = uuidv4();
-    }
-
-    order.statusPengiriman = statusPengiriman;
-    await order.save();
-
-    res.json({ message: "Order status updated", nomorResi: order.nomorResi });
-  } catch (err) {
-    return next(new ApiError(500, err instanceof Error ? err.message : "Failed to update order status"));
-  }
 };
 
 
