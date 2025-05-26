@@ -64,8 +64,6 @@ const ManageOrder = () => {
         nextStatus = "DELIVERED";
       }
 
-      alert('orderId: ' + orderId + ', currentStatus: ' + currentStatus + ', nextStatus: ' + nextStatus);
-
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/order/${orderId}/update-status`, {
         method: "PUT",
         headers: {
