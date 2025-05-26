@@ -1,43 +1,97 @@
+import React, { useEffect, useState } from "react";
 import SellerNavbar from "../components/SellerNavbar";
 import SellerSidebar from "../components/SellerSidebar";
 import { Line, Bar } from "@ant-design/charts";
 
-// Dummy data for the past 7 days
-const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const today = new Date();
-const getDayLabel = (offset: number) => {
-  const d = new Date(today);
-  d.setDate(today.getDate() - offset);
-  return days[d.getDay()];
-};
-
-const data = Array.from({ length: 7 }).map((_, i) => ({
-  day: getDayLabel(6 - i),
-  sold: Math.floor(Math.random() * 20) + 10, // Dummy: 10-29 sold
-  total: Math.floor(Math.random() * 100) + 50, // Dummy: 50-149 total
-}));
-
-const lineConfig = {
-  data,
-  xField: "day",
-  yField: "sold",
-  smooth: true,
-  height: 250,
-  color: "#03ac0e",
-  point: { size: 5, shape: "diamond" },
-  label: { style: { fill: "#03ac0e" } },
-};
-
-const barConfig = {
-  data,
-  xField: "day",
-  yField: "total",
-  height: 250,
-  color: "#03ac0e",
-  label: { position: "middle", style: { fill: "#fff" } },
-};
-
 const SellerHomepage = () => {
+  const [aggregatedData, setAggregatedData] = useState<
+    { day: string; sold: number; revenue: number }[]
+  >([]);
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  useEffect(() => {
+    const fetchOrdersData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        // Fetch data from the getCurrentUserToko endpoint
+        const res = await fetch("/api/toko/current/owner", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          // Data format expected: { tokoId, namaToko, lokasiToko, barang: [...], orders: [...] }
+          const orders = data.orders || [];
+          // Save the full list of barang from toko as fallback for price lookup
+          const tokoBarang = data.barang || [];
+          const aggr = [];
+          const today = new Date();
+          // Loop for the last 7 days (oldest first)
+          for (let i = 6; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            const label = days[d.getDay()];
+            let sold = 0;
+            let revenue = 0;
+            orders.forEach((order: any) => {
+              const orderDate = new Date(order.waktuTransaksi);
+              if (
+                orderDate.getFullYear() === d.getFullYear() &&
+                orderDate.getMonth() === d.getMonth() &&
+                orderDate.getDate() === d.getDate()
+              ) {
+                order.orderItems.forEach((item: any) => {
+                  // Default quantity to 1 if item.jumlah doesn't exist
+                  const quantity = item.jumlah ? Number(item.jumlah) : 1;
+                  sold += quantity;
+                  // Try to get hargaBarang from the order item; if missing, lookup the toko's barang list.
+                  const price =
+                    item.barang && item.barang.hargaBarang
+                      ? Number(item.barang.hargaBarang)
+                      : Number(
+                          tokoBarang.find(
+                            (b: any) => b.barangId === item.barangId
+                          )?.hargaBarang
+                        ) || 0;
+                  revenue += quantity * price;
+                });
+              }
+            });
+            aggr.push({ day: label, sold, revenue });
+          }
+          setAggregatedData(aggr);
+        } else {
+          console.error("Failed to fetch toko orders data");
+        }
+      } catch (error) {
+        console.error("Error fetching toko orders data:", error);
+      }
+    };
+
+    fetchOrdersData();
+  }, []);
+
+  const lineConfig = {
+    data: aggregatedData,
+    xField: "day",
+    yField: "sold",
+    smooth: true,
+    height: 250,
+    color: "#03ac0e",
+    point: { size: 5, shape: "diamond" },
+    label: { style: { fill: "#03ac0e" } },
+  };
+
+  const barConfig = {
+    data: aggregatedData,
+    xField: "day",
+    yField: "revenue",
+    height: 250,
+    color: "#03ac0e",
+    label: { position: "middle", style: { fill: "#fff" } },
+  };
+
   return (
     <div>
       <SellerNavbar />
@@ -48,12 +102,34 @@ const SellerHomepage = () => {
             Seller Dashboard
           </h2>
           <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
-            <div style={{ flex: 1, minWidth: 320, background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px rgba(3,172,14,0.08)", padding: 24 }}>
-              <h3 style={{ marginBottom: 16, color: "#03ac0e" }}>Products Sold (7 Days)</h3>
+            <div
+              style={{
+                flex: 1,
+                minWidth: 320,
+                background: "#fff",
+                borderRadius: 12,
+                boxShadow: "0 2px 8px rgba(3,172,14,0.08)",
+                padding: 24,
+              }}
+            >
+              <h3 style={{ marginBottom: 16, color: "#03ac0e" }}>
+                Products Sold (7 Days)
+              </h3>
               <Line {...lineConfig} />
             </div>
-            <div style={{ flex: 1, minWidth: 320, background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px rgba(3,172,14,0.08)", padding: 24 }}>
-              <h3 style={{ marginBottom: 16, color: "#03ac0e" }}>Total Products (7 Days)</h3>
+            <div
+              style={{
+                flex: 1,
+                minWidth: 320,
+                background: "#fff",
+                borderRadius: 12,
+                boxShadow: "0 2px 8px rgba(3,172,14,0.08)",
+                padding: 24,
+              }}
+            >
+              <h3 style={{ marginBottom: 16, color: "#03ac0e" }}>
+                Total Revenue (7 Days)
+              </h3>
               <Bar {...barConfig} />
             </div>
           </div>
