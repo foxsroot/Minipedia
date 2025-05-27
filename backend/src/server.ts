@@ -12,12 +12,17 @@ import path from "path";
 const app = express();
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    origin: [process.env.CORS_ORIGIN || "http://172.16.202.254", "http://172.16.202.254:3000"],
     credentials: true,
 }));
 app.use(json());
 
-app.use("/uploads", express.static(path.join(__dirname, "./uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "./uploads"), { 
+    // Allow all origins to access files in /uploads
+    setHeaders: (res) => {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+    }
+}));
 
 // Routes start
 app.use("/api/auth", authRoutes);
@@ -37,8 +42,8 @@ if (require.main === module) {
         .sync()
         .then(() => {
             console.log("Database synced!");
-            // const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-            app.listen(process.env.PORT || 3000, () => {
+            const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+            app.listen(port, '0.0.0.0', () => {
                 console.log(`App started at port ${process.env.PORT}`);
             });
         })

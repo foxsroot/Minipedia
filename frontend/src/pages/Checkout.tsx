@@ -85,7 +85,7 @@ const Checkout = () => {
               }));
             setCheckoutItems(selected);
           }
-        } catch {}
+        } catch { }
       }
     }
   }, [location.state]);
@@ -150,10 +150,24 @@ const Checkout = () => {
       try {
         // If priceAfterDiscount is already available (from Cart), use it
         if (item.priceAfterDiscount !== undefined) {
+          // Fetch the rest of the item data from API to get namaBarang and fotoBarang
+          const res = await fetch(
+            `${import.meta.env.VITE_API_BASE_URL}/barang/${item.productId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          if (!res.ok) throw new Error("Failed to fetch item");
+          const data: Barang & { diskonProduk?: number } = await res.json();
+
+          console.log("Fetched item data:", data);
+
           results.push({
             barangId: item.productId,
-            namaBarang: "", // You may want to fetch name if needed
-            fotoBarang: "",
+            namaBarang: data.namaBarang,
+            fotoBarang: data.fotoBarang,
             hargaBarang: item.hargaBarang,
             quantity: item.quantity,
             diskonProduk: item.diskonProduk,
@@ -268,9 +282,7 @@ const Checkout = () => {
                       item.fotoBarang
                         ? item.fotoBarang.startsWith("http")
                           ? item.fotoBarang
-                          : `${import.meta.env.VITE_STATIC_URL}/${
-                              item.fotoBarang
-                            }`
+                          : `${import.meta.env.VITE_STATIC_URL}/${item.fotoBarang}`
                         : "/default-product.png"
                     }
                     alt={item.namaBarang}
