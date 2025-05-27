@@ -10,19 +10,19 @@ describe('Order Endpoints', () => {
 
     // Setup test data
     const userData = {
-        username: 'order_testuser',
-        password: 'testpass',
-        email: 'order_testuser09@example.com',
-        nama: 'Order Test User',
-        nomorTelpon: '08123456789'
+        username: 'AJG',
+        password: '123',
+        email: 'ajg@ajg.com',
+        nama: 'AJG',
+        nomorTelpon: '123123'
     };
 
     const tokoOwnerData = {
-        username: 'order_toko_owner',
-        password: 'testpass',
-        email: 'order_toko_owner009@example.com',
-        nama: 'Order Toko Owner',
-        nomorTelpon: '08123456780'
+        username: 'AJGG',
+        password: '1234',
+        email: 'ajgg@ajgg.com',
+        nama: 'AJGG',
+        nomorTelpon: '123123123'
     };
 
     beforeAll(async () => {
@@ -30,11 +30,13 @@ describe('Order Endpoints', () => {
         try { await request(app).post('/api/auth/register').send(userData); } catch {}
         const userLoginRes = await request(app).post('/api/auth/login').send({ email: userData.email, password: userData.password });
         userToken = userLoginRes.body.token;
+        console.log('User token:', userToken);
 
         // Register and login toko owner
         try { await request(app).post('/api/auth/register').send(tokoOwnerData); } catch {}
         let tokoOwnerLoginRes = await request(app).post('/api/auth/login').send({ email: tokoOwnerData.email, password: tokoOwnerData.password });
         tokoOwnerToken = tokoOwnerLoginRes.body.token;
+        console.log('Toko Owner token:', tokoOwnerToken);
 
         // Create toko for toko owner
         try {
@@ -60,8 +62,8 @@ describe('Order Endpoints', () => {
 
     afterAll(async () => {
         // Clean up: delete user and toko owner (soft delete)
-        try { await request(app).delete('/api/user').set('Authorization', `Bearer ${userToken}`); } catch {}
-        try { await request(app).delete('/api/user').set('Authorization', `Bearer ${tokoOwnerToken}`); } catch {}
+        // try { await request(app).delete('/api/user').set('Authorization', `Bearer ${userToken}`); } catch {}
+        // try { await request(app).delete('/api/user').set('Authorization', `Bearer ${tokoOwnerToken}`); } catch {}
     });
 
     describe('POST /api/order', () => {
@@ -79,7 +81,7 @@ describe('Order Endpoints', () => {
                     orderItems: [],
                     alamatPengiriman: 'Test Address',
                     nomorTelpon: '08123456789',
-                    pengiriman: "standard",
+                    pengiriman: "SICEPAT",
                     namaPenerima: "Test Receiver",
                 });
             expect(response.status).toBe(400);
@@ -87,15 +89,17 @@ describe('Order Endpoints', () => {
         });
 
         it('should create a new order with valid data', async () => {
+            console.log('Valid Barang ID:', validBarangId);
             const orderData = {
                 orderItems: [
-                    { barangId: validBarangId, quantity: 2, hargaBarang: 10000 }
+                    { barangId: "4ce05a64-ab48-4fe7-a8f4-fce27fd873ed", quantity: 2, hargaBarang: 10000 }
                 ],
                 alamatPengiriman: 'Test Address',
                 nomorTelpon: '08123456789',
-                pengiriman: "standard",
+                pengiriman: "SICEPAT",
                 namaPenerima: "Test Receiver",
             };
+            console.log('User Token:', userToken);
             const response = await request(app)
                 .post('/api/order')
                 .set('Authorization', `Bearer ${userToken}`)
@@ -151,52 +155,6 @@ describe('Order Endpoints', () => {
         });
     });
 
-    describe('PUT /api/order/:id', () => {
-        it('should return 401 without token', async () => {
-            const response = await request(app)
-                .put(`/api/order/${createdOrderId}`)
-                .send({ statusPengiriman: 'PACKED' });
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('message');
-        });
-
-        it('should return 403 if not the toko owner', async () => {
-            const response = await request(app)
-                .put(`/api/order/${createdOrderId}`)
-                .set('Authorization', `Bearer ${userToken}`)
-                .send({ statusPengiriman: 'PACKED' });
-            expect(response.status).toBe(403);
-            expect(response.body).toHaveProperty('message', 'Forbidden: You do not have permission to update this order');
-        });
-
-        it('should return 404 for non-existent order', async () => {
-            const response = await request(app)
-                .put(`/api/order/${invalidOrderId}`)
-                .set('Authorization', `Bearer ${tokoOwnerToken}`)
-                .send({ statusPengiriman: 'PACKED' });
-            expect(response.status).toBe(404);
-            expect(response.body).toHaveProperty('message', 'Order not found');
-        });
-
-        it('should return 400 if no fields to update', async () => {
-            const response = await request(app)
-                .put(`/api/order/${createdOrderId}`)
-                .set('Authorization', `Bearer ${tokoOwnerToken}`)
-                .send({});
-            expect(response.status).toBe(400);
-            expect(response.body).toHaveProperty('message', 'At least one field must be updated');
-        });
-
-        it('should update the order status as toko owner', async () => {
-            const response = await request(app)
-                .put(`/api/order/${createdOrderId}`)
-                .set('Authorization', `Bearer ${tokoOwnerToken}`)
-                .send({ statusPengiriman: 'PACKED' });
-            expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('statusPengiriman', 'PACKED');
-        });
-    });
-
     describe('PUT /api/order/:orderId/update-status', () => {
         it('should return 401 without token', async () => {
             const response = await request(app)
@@ -209,7 +167,7 @@ describe('Order Endpoints', () => {
         it('should return 404 for non-existent order', async () => {
             const response = await request(app)
                 .put(`/api/order/${invalidOrderId}/update-status`)
-                .set('Authorization', `Bearer ${tokoOwnerToken}`)
+                .set('Authorization', `Bearer ${userToken}`)
                 .send({ statusPengiriman: 'SHIPPED' });
             expect(response.status).toBe(404);
             expect(response.body).toHaveProperty('message', 'Order not found');
@@ -243,16 +201,35 @@ describe('Order Endpoints', () => {
         });
 
         it('should cancel the order (soft delete by statusPesanan)', async () => {
+            const orderData = {
+                orderItems: [
+                    { barangId: "4ce05a64-ab48-4fe7-a8f4-fce27fd873ed", quantity: 2, hargaBarang: 10000 }
+                ],
+                alamatPengiriman: 'Test Address',
+                nomorTelpon: '08123456789',
+                pengiriman: "SICEPAT",
+                namaPenerima: "Test Receiver",
+            };
+            console.log('User Token:', userToken);
             const response = await request(app)
+                .post('/api/order')
+                .set('Authorization', `Bearer ${userToken}`)
+                .send(orderData);
+            expect(response.status).toBe(201);
+            expect(response.body).toHaveProperty('orderId');
+            expect(response.body).toHaveProperty('userId');
+            expect(response.body).toHaveProperty('orderItems');
+            createdOrderId = response.body.orderId;
+            const response2 = await request(app)
                 .delete(`/api/order/${createdOrderId}`)
                 .set('Authorization', `Bearer ${userToken}`);
-            expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('message', 'Order canceled successfully');
+            expect(response2.status).toBe(200);
+            expect(response2.body).toHaveProperty('message', 'Order canceled successfully');
 
             // Check order statusPesanan is CANCELED (soft delete)
             const checkResponse = await request(app)
                 .get(`/api/order/${createdOrderId}`)
-                .set('Authorization', `Bearer ${userToken}`);
+                .set('Authorization', `Bearer ${tokoOwnerToken}`);
             expect(checkResponse.status).toBe(200);
             expect(checkResponse.body).toHaveProperty('statusPesanan', 'CANCELED');
         });

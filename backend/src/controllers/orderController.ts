@@ -116,68 +116,6 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
     }
 };
 
-export const updateOrder = async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-        return next(new ApiError(401, 'Unauthorized: User not authenticated'));
-    }
-
-    if (!req.body.tanggalBarangDiterima && !req.body.statusPengiriman && !req.body.statusPesanan) {
-        return next(new ApiError(400, 'At least one field must be updated'));
-    }
-
-    try {
-        const order = await Order.findByPk(
-            req.params.id,
-            {
-                include: [
-                    {
-                        model: OrderItem,
-                        as: 'orderItems',
-                        include: [
-                            {
-                                model: Barang,
-                                include: [
-                                    {
-                                        model: Toko
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-
-            }
-        );
-
-        if (!order) {
-            return next(new ApiError(404, 'Order not found'));
-        }
-
-        if (order.orderItems[0].barang.toko.userId !== req.user.userId) {
-            return next(new ApiError(403, 'Forbidden: You do not have permission to update this order'));
-        }
-
-        if (req.body.tanggalBarangDiterima) {
-            order.tanggalBarangDiterima = req.body.tanggalBarangDiterima;
-        }
-
-        if (req.body.statusPengiriman) {
-            order.statusPengiriman = req.body.statusPengiriman;
-        }
-
-        if (req.body.statusPesanan) {
-            order.statusPesanan = req.body.statusPesanan;
-        }
-
-        await order.save();
-        await order.reload();
-        res.status(200).json(order);
-    } catch (err) {
-        // return next(new ApiError(500, 'Failed to update order'));
-        return next(new ApiError(500, err instanceof Error ? err.message : 'Failed to create order'));
-    }
-};
-
 export const deleteOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const order = await Order.findByPk(req.params.id, {
@@ -193,7 +131,7 @@ export const deleteOrder = async (req: Request, res: Response, next: NextFunctio
             return next(new ApiError(404, 'Order not found'));
         }
 
-        if (order.statusPengiriman) {
+        if (order.statusPengiriman || order.statusPesanan === null) {
             return next(new ApiError(400, 'Order cannot be deleted if it has been shipped'));
         }
 
