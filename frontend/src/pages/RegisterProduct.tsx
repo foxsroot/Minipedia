@@ -60,15 +60,69 @@ const CreateItem: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>(
+    {}
+  );
   const navigate = useNavigate();
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type } = e.target;
+    let errorMsg = "";
+
+    // Validation for negative numbers
+    if (
+      ["stokBarang", "hargaBarang", "diskonProduk"].includes(name) &&
+      value !== "" &&
+      Number(value) < 0
+    ) {
+      errorMsg = "Tidak boleh bernilai negatif";
+    }
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: errorMsg,
+    }));
+
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    let errors: { [key: string]: string } = {};
+
+    if (!formData.namaBarang || formData.namaBarang.trim() === "") {
+      errors["namaBarang"] = "Nama barang tidak boleh kosong.";
+    }
+    if (!formData.deskripsiBarang || formData.deskripsiBarang.trim() === "") {
+      errors["deskripsiBarang"] = "Deskripsi barang tidak boleh kosong.";
+    }
+    if (!formData.fotoBarang) {
+      errors["fotoBarang"] = "Foto barang harus diupload.";
+    }
+    if (formData.stokBarang === "" || Number(formData.stokBarang) < 0) {
+      errors["stokBarang"] = "Stok barang tidak boleh kosong atau negatif.";
+    }
+    if (formData.hargaBarang === "" || Number(formData.hargaBarang) < 0) {
+      errors["hargaBarang"] = "Harga barang tidak boleh kosong atau negatif.";
+    }
+    if (
+      formData.diskonProduk !== null &&
+      formData.diskonProduk !== undefined &&
+      formData.diskonProduk !== "" &&
+      Number(formData.diskonProduk) < 0
+    ) {
+      errors["diskonProduk"] = "Diskon tidak boleh negatif.";
+    }
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      setError("Periksa kembali input Anda.");
+      setSaving(false);
+      return;
+    }
 
     setSaving(true);
     setError(null);
@@ -197,6 +251,8 @@ const CreateItem: React.FC = () => {
                       value={formData.namaBarang}
                       onChange={handleChange}
                       required
+                      error={!!fieldErrors.namaBarang}
+                      helperText={fieldErrors.namaBarang}
                     />
                   </Grid>
 
@@ -210,6 +266,8 @@ const CreateItem: React.FC = () => {
                       value={formData.deskripsiBarang}
                       onChange={handleChange}
                       required
+                      error={!!fieldErrors.deskripsiBarang}
+                      helperText={fieldErrors.deskripsiBarang}
                     />
                   </Grid>
 
@@ -223,6 +281,8 @@ const CreateItem: React.FC = () => {
                         value={formData.stokBarang}
                         onChange={handleChange}
                         required
+                        error={!!fieldErrors.stokBarang}
+                        helperText={fieldErrors.stokBarang}
                       />
                     </Grid>
                     <Grid item xs={4}>
@@ -234,6 +294,8 @@ const CreateItem: React.FC = () => {
                         value={formData.hargaBarang}
                         onChange={handleChange}
                         required
+                        error={!!fieldErrors.hargaBarang}
+                        helperText={fieldErrors.hargaBarang}
                       />
                     </Grid>
                     <Grid item xs={2}>
@@ -267,6 +329,8 @@ const CreateItem: React.FC = () => {
                         value={formData.diskonProduk || ""}
                         onChange={handleChange}
                         inputProps={{ min: 0, max: 100 }}
+                        error={!!fieldErrors.diskonProduk}
+                        helperText={fieldErrors.diskonProduk}
                       />
                     </Grid>
                   </Grid>
@@ -277,6 +341,7 @@ const CreateItem: React.FC = () => {
                       component="label"
                       fullWidth
                       sx={{ height: "56px" }}
+                      error={!!fieldErrors.fotoBarang}
                     >
                       Upload Gambar
                       <input
@@ -291,10 +356,16 @@ const CreateItem: React.FC = () => {
                               foto_barang: file.name,
                               fotoBarang: file,
                             });
+                            setFieldErrors((prev) => ({ ...prev, fotoBarang: "" }));
                           }
                         }}
                       />
                     </Button>
+                    {fieldErrors.fotoBarang && (
+                      <Typography color="error" variant="caption" display="block" sx={{ mt: 1 }}>
+                        {fieldErrors.fotoBarang}
+                      </Typography>
+                    )}
                     {formData.foto_barang && (
                       <Typography
                         variant="caption"

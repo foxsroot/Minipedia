@@ -37,8 +37,9 @@ if (require.main === module) {
         .sync()
         .then(() => {
             console.log("Database synced!");
+            // const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
             app.listen(process.env.PORT || 3000, () => {
-                console.log("App started at port 3000");
+                console.log(`App started at port ${process.env.PORT}`);
             });
         })
         .catch((err) => {

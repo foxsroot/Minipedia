@@ -111,7 +111,11 @@ const Cart = () => {
           (item) => item.barangId === cartItem.barangId
         );
         if (barang) {
-          return acc + barang.hargaBarang * cartItem.quantity;
+          const hasDiscount = barang.diskonProduk && barang.diskonProduk > 0;
+          const priceAfterDiscount = hasDiscount
+            ? barang.hargaBarang - (barang.hargaBarang * barang.diskonProduk) / 100
+            : barang.hargaBarang;
+          return acc + priceAfterDiscount * cartItem.quantity;
         }
       }
       return acc;
@@ -120,6 +124,34 @@ const Cart = () => {
 
   // Show subtotal only if at least one item is selected
   const anySelected = cartItems.some((item) => item.selected);
+
+  const handleCheckout = () => {
+    // Pass selected items with diskonProduk and discounted price
+    const selectedItemsWithDiscount = cartItems
+      .filter((item) => item.selected)
+      .map((cartItem) => {
+        const barang = items.find((b) => b.barangId === cartItem.barangId);
+        const diskonProduk = barang?.diskonProduk ?? 0;
+        const hargaBarang = barang?.hargaBarang ?? 0;
+        const priceAfterDiscount =
+          diskonProduk > 0
+            ? hargaBarang - (hargaBarang * diskonProduk) / 100
+            : hargaBarang;
+        return {
+          barangId: cartItem.barangId,
+          quantity: cartItem.quantity,
+          hargaBarang,
+          diskonProduk,
+          priceAfterDiscount,
+        };
+      });
+
+    navigate("/checkout", {
+      state: {
+        selectedItems: selectedItemsWithDiscount,
+      },
+    });
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -140,7 +172,12 @@ const Cart = () => {
               );
               if (!barang) return null;
 
-              const totalPrice = barang.hargaBarang * cartItem.quantity;
+              // Calculate discounted price if any
+              const hasDiscount = barang.diskonProduk && barang.diskonProduk > 0;
+              const priceAfterDiscount = hasDiscount
+                ? barang.hargaBarang - (barang.hargaBarang * barang.diskonProduk) / 100
+                : barang.hargaBarang;
+              const totalPrice = priceAfterDiscount * cartItem.quantity;
 
               return (
                 <Grid item xs={12} key={cartItem.barangId}>
@@ -154,7 +191,7 @@ const Cart = () => {
                       alignItems: "center",
                       justifyContent: "space-between",
                       width: "97vw",
-                      mx: -3, // counter padding for full-width effect
+                      mx: -3,
                     }}
                   >
                     <Checkbox
@@ -175,9 +212,7 @@ const Cart = () => {
                           barang.fotoBarang
                             ? barang.fotoBarang.startsWith("http")
                               ? barang.fotoBarang
-                              : `${import.meta.env.VITE_STATIC_URL}/${
-                                  barang.fotoBarang
-                                }`
+                              : `${import.meta.env.VITE_STATIC_URL}/${barang.fotoBarang}`
                             : "/default-product.png"
                         }
                         alt={barang.namaBarang}
@@ -194,10 +229,54 @@ const Cart = () => {
                           <Typography variant="h6">
                             {barang.namaBarang}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Harga Satuan: Rp{" "}
-                            {barang.hargaBarang.toLocaleString("id-ID")}
-                          </Typography>
+                          {/* Harga satuan dengan diskon */}
+                          {hasDiscount ? (
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <Typography variant="body1" fontWeight="bold" sx={{ color: "#00AA5B" }}>
+                                {(priceAfterDiscount)
+                                  .toLocaleString("id-ID", {
+                                    style: "currency",
+                                    currency: "IDR",
+                                  })
+                                  .replace(",00", "")}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  textDecoration: "line-through",
+                                  color: "#888",
+                                  fontWeight: 400,
+                                  fontSize: "1rem",
+                                }}
+                              >
+                                {barang.hargaBarang
+                                  .toLocaleString("id-ID", {
+                                    style: "currency",
+                                    currency: "IDR",
+                                  })
+                                  .replace(",00", "")}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  bgcolor: "#ff5e8b",
+                                  color: "#fff",
+                                  fontWeight: 700,
+                                  fontSize: "0.9rem",
+                                  px: 1,
+                                  py: 0.3,
+                                  borderRadius: 1,
+                                  ml: 1,
+                                }}
+                              >
+                                {barang.diskonProduk}%
+                              </Typography>
+                            </Box>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">
+                              Harga Satuan: Rp {barang.hargaBarang.toLocaleString("id-ID")}
+                            </Typography>
+                          )}
                         </CardContent>
 
                         <Box
@@ -246,8 +325,13 @@ const Cart = () => {
                       <Typography variant="subtitle1" fontWeight="bold">
                         Total:
                       </Typography>
-                      <Typography variant="h6" color="primary">
-                        Rp {totalPrice.toLocaleString("id-ID")}
+                      <Typography variant="h6" fontWeight="bold" sx={{ color: "#00AA5B" }}>
+                        {(priceAfterDiscount * cartItem.quantity)
+                          .toLocaleString("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                          })
+                          .replace(",00", "")}
                       </Typography>
                     </Box>
                   </Card>
@@ -281,13 +365,7 @@ const Cart = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={() =>
-              navigate("/checkout", {
-                state: {
-                  selectedItems: cartItems.filter((item) => item.selected),
-                },
-              })
-            }
+            onClick={handleCheckout}
             size="large"
             sx={{ borderRadius: 0.5, px: 4, py: 1.5, mt: { xs: 2, sm: 0 } }}
           >

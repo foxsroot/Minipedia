@@ -119,9 +119,7 @@ const ProductDetail = () => {
                   {barang?.namaBarang || "Unknown Barang"}
                 </Typography>
 
-                <Box
-                  sx={{ display: "flex", gap: 1, mt: 1, alignItems: "center" }}
-                >
+                <Box sx={{ display: "flex", gap: 1, mt: 1, alignItems: "center" }}>
                   {!barang?.jumlahTerjual || barang.jumlahTerjual === 0 ? (
                     <Typography variant="body2" color="text.secondary">
                       Belum Terjual🤣
@@ -133,18 +131,71 @@ const ProductDetail = () => {
                   )}
                 </Box>
 
-                <Typography
-                  variant="h4"
-                  fontWeight="bold"
-                  sx={{ mt: 2, color: "#00AA5B" }}
-                >
-                  {barang?.hargaBarang
-                    .toLocaleString("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                    })
-                    .replace(",00", "")}
-                </Typography>
+                {/* Harga dengan diskon */}
+                <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}>
+                  {barang?.diskonProduk && barang.diskonProduk > 0 ? (
+                    <>
+                      <Typography
+                        variant="h4"
+                        fontWeight="bold"
+                        sx={{ color: "#00AA5B" }}
+                      >
+                        {(barang.hargaBarang - (barang.hargaBarang * barang.diskonProduk) / 100)
+                          .toLocaleString("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                          })
+                          .replace(",00", "")}
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          textDecoration: "line-through",
+                          color: "#888",
+                          fontWeight: 400,
+                          fontSize: "1.2rem",
+                        }}
+                      >
+                        {barang.hargaBarang
+                          .toLocaleString("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                          })
+                          .replace(",00", "")}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          bgcolor: "#ff5e8b",
+                          color: "#fff",
+                          fontWeight: 700,
+                          fontSize: "1rem",
+                          px: 1.2,
+                          py: 0.5,
+                          borderRadius: 1,
+                          ml: 1,
+                        }}
+                      >
+                        {barang.diskonProduk}%
+                      </Typography>
+                    </>
+                  ) : (
+                    <Typography
+                      variant="h4"
+                      fontWeight="bold"
+                      sx={{ color: "#00AA5B" }}
+                    >
+                      {barang?.hargaBarang
+                        .toLocaleString("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        })
+                        .replace(",00", "")}
+                    </Typography>
+                  )}
+                </Box>
+                {/* End harga dengan diskon */}
+
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="body2">
                     <b>Kondisi:</b> Baru <br />
@@ -210,14 +261,29 @@ const ProductDetail = () => {
                 <Divider sx={{ my: 2 }} />
 
                 <Typography variant="body2">Subtotal</Typography>
-                <Typography variant="h6" fontWeight="bold">
-                  {(totalPrice ?? 0)
-                    .toLocaleString("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                    })
-                    .replace(",00", "")}
-                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {barang?.diskonProduk && barang.diskonProduk > 0 ? (
+                    <>
+                      <Typography variant="h6" fontWeight="bold" sx={{ color: "#00AA5B" }}>
+                        {((barang.hargaBarang - (barang.hargaBarang * barang.diskonProduk) / 100) * quantity)
+                          .toLocaleString("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                          })
+                          .replace(",00", "")}
+                      </Typography>
+                    </>
+                  ) : (
+                    <Typography variant="h6" fontWeight="bold" sx={{ color: "#00AA5B" }}>
+                      {(totalPrice ?? 0)
+                        .toLocaleString("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        })
+                        .replace(",00", "")}
+                    </Typography>
+                  )}
+                </Box>
 
                 <Button
                   fullWidth

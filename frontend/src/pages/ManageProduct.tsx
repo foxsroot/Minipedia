@@ -188,10 +188,37 @@ const ManageProduct = () => {
                           variant="contained"
                           color="primary"
                           size="small"
-                          style={{ textTransform: "none" }}
+                          style={{ textTransform: "none", marginRight: 8 }}
                           onClick={() => navigate(`/edit-product/${b.barangId}`)}
                         >
                           Edit
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          style={{ textTransform: "none" }}
+                          onClick={async () => {
+                            if (window.confirm("Yakin ingin menghapus barang ini?")) {
+                              try {
+                                const res = await fetch(`/api/barang/${b.barangId}`, {
+                                  method: "DELETE",
+                                  headers: {
+                                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                  },
+                                });
+                                if (res.ok) {
+                                  setBarang((prev) => prev.filter((item) => item.barangId !== b.barangId));
+                                } else {
+                                  alert("Gagal menghapus barang.");
+                                }
+                              } catch (err) {
+                                alert("Terjadi kesalahan saat menghapus barang.");
+                              }
+                            }
+                          }}
+                        >
+                          Delete
                         </Button>
                       </TableCell>
                     </TableRow>

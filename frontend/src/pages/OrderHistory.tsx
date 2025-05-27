@@ -241,17 +241,27 @@ const OrderHistory: React.FC = () => {
                         color="#03ac0e"
                         fontSize={18}
                       >
-                        {order.orderItems
-                          .reduce(
-                            (sum: number, item: any) =>
-                              sum + item.hargaBarang * item.quantity,
+                        {(() => {
+                          // Hitung subtotal diskon
+                          const subtotal = order.orderItems.reduce(
+                            (sum: number, item: any) => {
+                              const hasDiscount =
+                                item.persentaseDiskon && item.persentaseDiskon > 0;
+                              const priceAfterDiscount = hasDiscount
+                                ? item.hargaBarang -
+                                  (item.hargaBarang * item.persentaseDiskon) / 100
+                                : item.hargaBarang;
+                              return sum + priceAfterDiscount * item.quantity;
+                            },
                             0
-                          )
-                          .toLocaleString("id-ID", {
-                            style: "currency",
-                            currency: "IDR",
-                          })
-                          .replace(",00", "")}
+                          );
+                          const tax = subtotal * 0.1;
+                          const adminFee = 5000;
+                          const grandTotal = subtotal + tax + adminFee;
+                          return `Rp ${grandTotal
+                            .toLocaleString("id-ID")
+                            .replace(",00", "")}`;
+                        })()}
                       </Typography>
                     </Box>
                   </Box>

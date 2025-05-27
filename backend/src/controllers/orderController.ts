@@ -83,6 +83,12 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
     }
 
     try {
+        // Fetch diskonProduk for each barang and set persentaseDiskon in orderItems
+        for (const item of req.body.orderItems) {
+            const barang = await Barang.findByPk(item.barangId);
+            item.persentaseDiskon = barang ? barang.diskonProduk : 0;
+        }
+
         const order = await Order.create(
             {
                 ...req.body,

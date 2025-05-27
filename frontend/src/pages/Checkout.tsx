@@ -9,7 +9,7 @@ import {
   CssBaseline,
   Button,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/main.css";
 import NavigationBar from "../components/NavigationBar";
 import { useCartContext } from "../contexts/CartContext";
@@ -17,6 +17,9 @@ import { useCartContext } from "../contexts/CartContext";
 interface CheckOutProps {
   productId: string;
   quantity: number;
+  hargaBarang: number;
+  diskonProduk?: number;
+  priceAfterDiscount?: number;
 }
 
 interface Barang {
@@ -47,30 +50,45 @@ const theme = createTheme({
 const Checkout = () => {
   const [checkoutItems, setCheckoutItems] = useState<CheckOutProps[]>([]);
   const [items, setItems] = useState<
-    (Barang & { quantity: number; totalPrice: number })[]
+    (Barang & { quantity: number; totalPrice: number, diskonProduk: number })[]
   >([]);
   const { removeFromCart } = useCartContext();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const cartItemsRaw = localStorage.getItem("cartItems");
-    if (cartItemsRaw) {
-      try {
-        const parsed = JSON.parse(cartItemsRaw);
-        if (Array.isArray(parsed)) {
-          const selected = parsed
-            .filter((item: any) => item.selected)
-            .map((item: any) => ({
-              productId: item.barangId,
-              quantity: item.quantity,
-            }));
-          setCheckoutItems(selected);
-        }
-      } catch {}
+    // If coming from Cart page, use state
+    if (location.state && location.state.selectedItems) {
+      setCheckoutItems(
+        location.state.selectedItems.map((item: any) => ({
+          productId: item.barangId,
+          quantity: item.quantity,
+          hargaBarang: item.hargaBarang,
+          diskonProduk: item.diskonProduk,
+          priceAfterDiscount: item.priceAfterDiscount,
+        }))
+      );
+    } else {
+      // fallback to localStorage (for reload)
+      const cartItemsRaw = localStorage.getItem("cartItems");
+      if (cartItemsRaw) {
+        try {
+          const parsed = JSON.parse(cartItemsRaw);
+          if (Array.isArray(parsed)) {
+            const selected = parsed
+              .filter((item: any) => item.selected)
+              .map((item: any) => ({
+                productId: item.barangId,
+                quantity: item.quantity,
+              }));
+            setCheckoutItems(selected);
+          }
+        } catch {}
+      }
     }
-  }, []);
+  }, [location.state]);
 
   const handleDialogConfirm = async ({
     namaPenerima,
@@ -83,7 +101,7 @@ const Checkout = () => {
     nomorTelepon: string;
     pengiriman: string;
     alamatPengiriman: string;
-    orderItems: { barangId: string; quantity: number }[];
+    orderItems: { barangId: string; quantity: number, diskonProduk: number, hargaBarang: number }[];
   }) => {
     try {
       const response = await fetch(
@@ -119,7 +137,6 @@ const Checkout = () => {
       }
 
       const data = await response.json();
-      alert("Pesanan berhasil dibuat! Order ID: " + data.orderId);
       setDialogOpen(false);
     } catch (err) {
       alert("Terjadi kesalahan saat checkout.");
@@ -128,24 +145,48 @@ const Checkout = () => {
   };
 
   const fetchItems = async () => {
-    const results: (Barang & { quantity: number; totalPrice: number })[] = [];
+    const results: (Barang & { quantity: number; totalPrice: number; diskonProduk?: number; priceAfterDiscount?: number })[] = [];
     for (const item of checkoutItems) {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/barang/${item.productId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        if (!res.ok) throw new Error("Failed to fetch item");
-        const data: Barang = await res.json();
-        results.push({
-          ...data,
-          quantity: item.quantity,
-          totalPrice: data.hargaBarang * item.quantity,
-        });
+        // If priceAfterDiscount is already available (from Cart), use it
+        if (item.priceAfterDiscount !== undefined) {
+          results.push({
+            barangId: item.productId,
+            namaBarang: "", // You may want to fetch name if needed
+            fotoBarang: "",
+            hargaBarang: item.hargaBarang,
+            quantity: item.quantity,
+            diskonProduk: item.diskonProduk,
+            priceAfterDiscount: item.priceAfterDiscount,
+            totalPrice: item.priceAfterDiscount * item.quantity,
+          });
+        } else {
+          // fallback: fetch from API
+          const res = await fetch(
+            `${import.meta.env.VITE_API_BASE_URL}/barang/${item.productId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          if (!res.ok) throw new Error("Failed to fetch item");
+          const data: Barang & { diskonProduk?: number } = await res.json();
+
+          const diskonProduk = data.diskonProduk ?? 0;
+          const hasDiscount = diskonProduk > 0;
+          const priceAfterDiscount = hasDiscount
+            ? data.hargaBarang - (data.hargaBarang * diskonProduk) / 100
+            : data.hargaBarang;
+
+          results.push({
+            ...data,
+            quantity: item.quantity,
+            diskonProduk,
+            priceAfterDiscount,
+            totalPrice: priceAfterDiscount * item.quantity,
+          });
+        }
       } catch (err) {
         console.error(err);
       }
