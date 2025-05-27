@@ -81,9 +81,14 @@ export const createBarang = async (req: Request, res: Response, next: NextFuncti
     try {
         const hargaBarangNumber = parseFloat(req.body.hargaBarang);
 
-        if (isNaN(hargaBarangNumber) || hargaBarangNumber < 0) {
+        if (isNaN(hargaBarangNumber) || hargaBarangNumber <= 0) {
             return next(new ApiError(400, 'Invalid hargaBarang format'));
         }
+
+        if (isNaN(req.body.stokBarang) || req.body.stokBarang < 0) {
+            return next(new ApiError(400, 'Invalid stokBarang format'));
+        }
+
     } catch (err) {
         return next(new ApiError(400, 'Invalid hargaBarang format'));
     }
@@ -110,6 +115,7 @@ export const createBarang = async (req: Request, res: Response, next: NextFuncti
                 deskripsiBarang: req.body.deskripsiBarang,
                 kategoriProduk: req.body.kategoriProduk,
                 fotoBarang: req.body.fotoBarang,
+                diskonProduk: req.body.diskonProduk || 0,
                 tokoId: tokoId,
             }
         );

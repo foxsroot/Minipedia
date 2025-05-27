@@ -24,6 +24,7 @@ const CreateItem: React.FC = () => {
     kategoriProduk: string;
     foto_barang: string;
     fotoBarang?: File | null;
+    diskonProduk?: number | null;
   }>({
     namaBarang: "",
     deskripsiBarang: "",
@@ -32,6 +33,7 @@ const CreateItem: React.FC = () => {
     kategoriProduk: "ELECTRONICS", // Set a default value for kategoriProduk
     foto_barang: "",
     fotoBarang: null,
+    diskonProduk: null,
   });
 
   // Enum values for kategoriProduk
@@ -124,6 +126,7 @@ const CreateItem: React.FC = () => {
         kategoriProduk: "ELECTRONICS", // Reset to default value
         foto_barang: "",
         fotoBarang: null,
+        diskonProduk: null,
       });
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan.");
@@ -233,7 +236,7 @@ const CreateItem: React.FC = () => {
                         required
                       />
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={2}>
                       <TextField
                         select
                         name="kategoriProduk"
@@ -244,7 +247,7 @@ const CreateItem: React.FC = () => {
                         required
                         sx={{
                           "& .MuiSelect-select": {
-                            minWidth: "100%", // Ensure the dropdown spans the full width
+                            minWidth: "100%",
                           },
                         }}
                       >
@@ -254,6 +257,17 @@ const CreateItem: React.FC = () => {
                           </MenuItem>
                         ))}
                       </TextField>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <TextField
+                        name="diskonProduk"
+                        label="Diskon (%)"
+                        fullWidth
+                        type="number"
+                        value={formData.diskonProduk || ""}
+                        onChange={handleChange}
+                        inputProps={{ min: 0, max: 100 }}
+                      />
                     </Grid>
                   </Grid>
 
