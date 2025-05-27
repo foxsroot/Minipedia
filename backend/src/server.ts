@@ -1,6 +1,6 @@
 import express, { json } from "express";
 import { sequelize } from "./models/index";
-import { errorHandler } from "./middlewares/errorHandler";
+import errorHandler from "./middlewares/errorHandler";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import barangRoutes from "./routes/barangRoutes";

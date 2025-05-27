@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Barang, Toko, OrderItem, Order } from '../models/index';
 import { ApiError } from '../utils/ApiError';
+import { Console } from 'console';
 
 export const getBarangById = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -152,6 +153,17 @@ export const updateBarang = async (req: Request, res: Response, next: NextFuncti
             return next(new ApiError(403, 'Forbidden: You do not have permission to update this barang'));
         }
 
+        // Validate hargaBarang, stokBarang, and diskonProduk are >= 0 if provided
+        if (req.body.hargaBarang !== undefined && req.body.hargaBarang < 0) {
+            return next(new ApiError(400, 'hargaBarang must be greater than or equal to 0'));
+        }
+        if (req.body.stokBarang !== undefined && req.body.stokBarang < 0) {
+            return next(new ApiError(400, 'stokBarang must be greater than or equal to 0'));
+        }
+        if (req.body.diskonProduk !== undefined && req.body.diskonProduk < 0) {
+            return next(new ApiError(400, 'diskonProduk must be greater than or equal to 0'));
+        }
+
         // If a new file is uploaded, update fotoBarang
         if (req.file) {
             req.body.fotoBarang = `${req.file.filename}`;
@@ -165,30 +177,28 @@ export const updateBarang = async (req: Request, res: Response, next: NextFuncti
 };
 
 export const deleteBarang = async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-        return next(new ApiError(401, 'Unauthorized: User not authenticated'));
-    }
+    console.log("USER : ", req.user);
+        if (!req.user) {
+            return next(new ApiError(401, 'Unauthorized: User not authenticated'));
+        }
+    console.log("USER Toko ID : ", req.user.tokoId);
+        const tokoId = req.user.tokoId;
 
-    const tokoId = req.user.tokoId;
-
-    if (!tokoId) {
-        return next(new ApiError(400, 'User doesn\'t have a toko'));
-    }
-
-    try {
+        if (!tokoId) {
+            return next(new ApiError(400, 'User doesn\'t have a toko'));
+        }
+        
         const barang = await Barang.findByPk(req.params.id);
-
+        console.log("BARANG : ", barang);
         if (!barang) {
             return next(new ApiError(404, 'Barang not found'));
         }
-
+        console.log("BARANG Toko ID : ", barang.tokoId);
         if (barang.tokoId !== tokoId) {
             return next(new ApiError(403, 'Forbidden: You do not have permission to delete this barang'));
         }
 
         await barang.destroy();
         res.status(204).send();
-    } catch (err) {
-        return next(new ApiError(500, 'Failed to delete barang'));
-    }
+    
 };

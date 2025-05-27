@@ -4,8 +4,8 @@ import app from '../server';
 describe('Toko Endpoints', () => {
     let token: string;
     const userData = {
-        password: 'testpass',
-        email: 'testuser@example.com',
+        password: '123',
+        email: 'luis@luis.com',
     };
 
     beforeAll(async () => {

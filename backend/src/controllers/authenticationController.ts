@@ -12,7 +12,7 @@ const redis = new Redis();
 export async function register(req: Request, res: Response, next: NextFunction) {
     const { username, email, password, nama, nomorTelpon } = req.body;
 
-    if (!username || !email || !password || !nama || !nomorTelpon) {
+    if (!username && username != '' || !email && email != '' || !password && password  != '' || !nama && nama != '' || !nomorTelpon && nomorTelpon != '') {
         return next(new ApiError(400, 'All fields are required'));
     }
 
@@ -24,9 +24,18 @@ export async function register(req: Request, res: Response, next: NextFunction) 
             return next(new ApiError(500, 'ENCRYPT_SECRET must be a 64-character hex string'));
         }
 
-        const encryptedEmail = encryptField(email, ENCRYPT_SECRET);
+        // const encryptedEmail = encryptField(email, ENCRYPT_SECRET);
+        // const existingUser = await User.findOne({ where: { email: encryptedEmail } });
 
-        const existingUser = await User.findOne({ where: { email: encryptedEmail } });
+        const allUsers = await User.findAll({ paranoid: false }); // include soft-deleted for uniqueness check
+        let existingUser = null;
+        for (const u of allUsers) {
+            const decryptedEmail = decryptUserFields(u).email;
+            if (decryptedEmail === email) {
+                existingUser = u;
+                break;
+            }
+        }
 
         if (existingUser) {
             return next(new ApiError(409, 'Email already registered'));
